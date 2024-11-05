@@ -1,5 +1,6 @@
 // src/App.jsx
 import React, { useState } from 'react';
+import { Container, Typography } from '@mui/material';
 import PromptSelector from './components/PromptSelector';
 import TranscriptionViewer from './components/TranscriptionViewer';
 import SummaryEditor from './components/SummaryEditor';
@@ -8,8 +9,10 @@ function App() {
   const [sessionId, setSessionId] = useState(null);
 
   return (
-    <div className="app-container">
-      <h1>Your Video Summarization Tool</h1>
+    <Container maxWidth="lg">
+      <Typography variant="h3" align="center" gutterBottom>
+        Video Summarization Tool
+      </Typography>
       <PromptSelector setSessionId={setSessionId} />
       {sessionId && (
         <>
@@ -17,7 +20,7 @@ function App() {
           <SummaryEditor sessionId={sessionId} />
         </>
       )}
-    </div>
+    </Container>
   );
 }
 

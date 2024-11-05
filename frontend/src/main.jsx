@@ -1,19 +1,17 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+// src/main.jsx
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import theme from './theme';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
-const theme = createTheme();
-
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <App />
     </ThemeProvider>
   </React.StrictMode>,
-)
+  document.getElementById('root')
+);
