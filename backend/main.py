@@ -5,6 +5,7 @@ import asyncio
 import os
 import uuid
 from typing import List, Dict
+import json
 
 app = FastAPI()
 
@@ -17,6 +18,11 @@ class ProcessRequest(BaseModel):
     prompt: str
     num_generations: int = 3  # Default to 3
 
+class PromptResponse(BaseModel):
+    id: int
+    name: str
+    content: str
+
 class ProcessResponse(BaseModel):
     session_id: str
 
@@ -24,7 +30,7 @@ class StatusResponse(BaseModel):
     status: str
 
 class ResultResponse(BaseModel):
-    summaries: List[str]
+    summaries: Dict
     transcription: str
 
 class SearchRequest(BaseModel):
@@ -39,7 +45,7 @@ class FinalSummaryRequest(BaseModel):
 # Placeholder functions for actual implementations
 async def download_video_temp(video_url):
     # Simulate downloading and converting video to audio
-    await asyncio.sleep(2)
+    # await asyncio.sleep(2)
     audio_path = f"audio/{uuid.uuid4()}.mp3"
     video_title = "Sample Video Title"
     os.makedirs(os.path.dirname(audio_path), exist_ok=True)
@@ -49,17 +55,14 @@ async def download_video_temp(video_url):
 
 async def transcribe_audio(audio_path, video_title):
     # Simulate transcription
-    await asyncio.sleep(5)
+    # await asyncio.sleep(5)
     transcription = "Transcribed text of the audio."
     return transcription
 
 async def generate_summaries(transcription, prompt, num_generations):
     # Simulate summary generation
-    await asyncio.sleep(2)
-    summaries = [
-        f"Summary {i+1}: {prompt} applied to the transcription."
-        for i in range(num_generations)
-    ]
+    # await asyncio.sleep(2)
+    summaries = {f"Summary {i+1}": f"{prompt} applied to the transcription." for i in range(3)}
     return summaries
 
 @app.post("/process_video", response_model=ProcessResponse)
@@ -80,7 +83,6 @@ async def processing_task(session_id, video_url, prompt, num_generations):
         audio_path, video_title = await download_video_temp(video_url)
         transcription = await transcribe_audio(audio_path, video_title)
         summaries = await generate_summaries(transcription, prompt, num_generations)
-
         sessions[session_id] = {
             "status": "completed",
             "transcription": transcription,
@@ -123,6 +125,13 @@ async def search_transcription(session_id: str, request: SearchRequest):
         if request.search_term.lower() in line.lower()
     ]
     return SearchResponse(matching_lines=matching_lines)
+
+
+@app.get("/get_prompts", response_model=list[PromptResponse])
+async def get_prompts():
+    with open("prompts.json", "r") as f:
+        data = json.load(f)
+    return data
 
 @app.post("/save_final_summary/{session_id}", response_model=StatusResponse)
 async def save_final_summary(session_id: str, request: FinalSummaryRequest):

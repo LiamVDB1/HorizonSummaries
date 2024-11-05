@@ -11,7 +11,7 @@ function App() {
   return (
     <Container maxWidth="lg">
       <Typography variant="h3" align="center" gutterBottom>
-        Video Summarization Tool
+        Horizon Summaries
       </Typography>
       <PromptSelector setSessionId={setSessionId} />
       {sessionId && (

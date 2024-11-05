@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "name": "Key Points Summary",
+        "content": "Summarize the key points of the transcription."
+    },
+    {
+        "id": 2,
+        "name": "Executive Summary",
+        "content": "Provide an executive summary of the content."
+    },
+    {
+        "id": 3,
+        "name": "Main Arguments Highlight",
+        "content": "Highlight the main arguments presented."
+    }
+]

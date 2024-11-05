@@ -43,24 +43,24 @@ function SummaryEditor({ sessionId }) {
   return (
     <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
       <Typography variant="h5" gutterBottom>
-        Summaries
+        Generated Summaries
       </Typography>
       <Grid container spacing={2}>
-        {summaries.map((summary, index) => (
-          <Grid item xs={12} sm={6} key={index}>
-            <TextField
-              label={`Summary ${index + 1}`}
-              variant="outlined"
-              multiline
-              rows={6}
-              fullWidth
-              value={summary}
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-          </Grid>
-        ))}
+          {Object.entries(summaries).map(([label, summary], index) => (
+            <Grid item xs={12} sm={6} key={index}>
+              <TextField
+                label={label}
+                variant="outlined"
+                multiline
+                rows={6}
+                fullWidth
+                value={summary}
+                InputProps={{
+                  readOnly: true,
+                }}
+              />
+            </Grid>
+          ))}
       </Grid>
       <Typography variant="h6" style={{ marginTop: '20px' }}>
         Final Summary
