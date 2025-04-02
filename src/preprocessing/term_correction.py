@@ -1,179 +1,142 @@
+# src/preprocessing/term_correction.py
 """
-Functions for correcting Jupiter-specific terms in transcripts.
+Applies term corrections to a transcript using both persisted corrections
+from a database and newly identified corrections from an LLM analysis.
 """
 
-import re
-import json
 import logging
-from typing import Dict, List
+import json
+import re
+from typing import List, Dict, Optional
 
 from src.config import Config
-from src.utils.file_handling import read_json, ensure_directory
+from src.utils.logger import setup_logger
+from src.database.term_db import get_all_term_corrections, add_multiple_term_corrections
+from src.llm.term_analyzer import analyze_transcript_for_term_errors # Async function
 
-logger = logging.getLogger("horizon_summaries")
+logger = setup_logger(__name__)
 
-# Default Jupiter terms corrections if the JSON file is not available
-DEFAULT_TERMS = {
-    "jup": "JUP",
-    "jup token": "JUP token",
-    "jupiter": "Jupiter",
-    "jupyter": "Jupiter",
-    "jupitor": "Jupiter",
-    "the dow": "the DAO",
-    "dow": "DAO",
-    "solana": "Solana",
-    "cat det": "Catdet",
-    "catdets": "Catdets",
-    "cat dets": "Catdets",
-    "cap det": "Catdet",
-    "cap dets": "Catdets",
-    "jupe ai": "JUP AI",
-    "jupe-ai": "JUP AI",
-    "jupe": "JUP",
-    "the universe": "the Jupiverse",
-    "universe": "Jupiverse",
-    "jup and juice": "Jup & Juice",
-    "j. for j.": "J4J",
-    "jay for jay": "J4J",
-    "core working group": "Core Working Group",
-    "cwg": "CWG",
-    "uplink working group": "Uplink Working Group",
-    "uplink": "Uplink Working Group",
-    "lfg launchpad": "LFG Launchpad",
-    "lfg": "LFG",
-    "planetary call": "Planetary Call",
-    "asr": "ASR",
-    "active staking rewards": "Active Staking Rewards",
-    "decca": "DCA",
-    "dollar cost averaging": "Dollar Cost Averaging",
-    "the space station": "the SpaceStation",
-    "space station": "SpaceStation",
-    "jupe research": "JupResearch",
-    "jupe-research": "JupResearch",
-    "cats of culture": "Cats of Culture",
-    "coc": "CoC",
-    "ppp": "PPP",
-    "player pump player": "Player Pump Player",
-    "web three": "Web3",
-    "web 3": "Web3",
-    "gemini pro": "Gemini Pro",
-    "claude opus": "Claude Opus",
-    "horizon ai": "Horizon AI",
-    "jupiter horizon": "Jupiter Horizon",
-    "horizon": "Jupiter Horizon",
-    "gpt four": "GPT-4",
-    "gpt-four": "GPT-4"
-}
-
-
-def load_jupiter_terms() -> Dict[str, str]:
-    """
-    Load Jupiter-specific terms from a JSON file or use defaults.
-
-    Returns:
-        Dict[str, str]: Dictionary of incorrect terms -> correct terms
-    """
+def _load_known_terms() -> List[str]:
+    """Loads the list of known correct Jupiter terms from the resource file."""
     try:
-        # Try to load the terms from the JSON file
-        terms = read_json(Config.JUPITER_TERMS_FILE)
-        logger.info(f"Loaded Jupiter terms from {Config.JUPITER_TERMS_FILE}: {len(terms)} terms")
-        return terms
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        # If the file doesn't exist or is invalid, use the default terms and save them
-        logger.warning(f"Jupiter terms file not found or invalid: {str(e)}")
-        logger.info("Using default Jupiter terms")
-
-        # Save the default terms for future use
-        try:
-            ensure_directory(Config.RESOURCES_DIR)
-            with open(Config.JUPITER_TERMS_FILE, 'w', encoding='utf-8') as f:
-                json.dump(DEFAULT_TERMS, f, indent=2)
-            logger.info(f"Saved default Jupiter terms to {Config.JUPITER_TERMS_FILE}")
-        except Exception as save_error:
-            logger.warning(f"Failed to save default Jupiter terms: {str(save_error)}")
-
-        return DEFAULT_TERMS
-
-
-def build_terms_regex() -> re.Pattern:
-    """
-    Build a regex pattern for Jupiter terms.
-
-    Returns:
-        re.Pattern: Compiled regex pattern
-    """
-    terms = load_jupiter_terms()
-    pattern = r'\b(?:' + '|'.join(map(re.escape, terms.keys())) + r')\b'
-    return re.compile(pattern, re.IGNORECASE)
-
-
-def correct_jupiter_terms(transcript: str) -> str:
-    """
-    Correct Jupiter-specific terms in a transcript.
-
-    Args:
-        transcript (str): The transcript text
-
-    Returns:
-        str: Transcript with corrected terms
-    """
-    logger.info("Correcting Jupiter-specific terms")
-
-    terms = load_jupiter_terms()
-
-    def replace_term(match):
-        matched_term = match.group(0)
-        # Find the correct replacement, handling case-insensitivity
-        for incorrect, correct in terms.items():
-            if matched_term.lower() == incorrect.lower():
-                # Check if the original was uppercase
-                if matched_term.isupper():
-                    return correct.upper()
-                # Check if the original was title case
-                elif matched_term.istitle():
-                    return correct.title() if ' ' not in correct else correct
-                # Otherwise, use the correct term as-is
+        if Config.JUPITER_TERMS_FILE.exists():
+            with open(Config.JUPITER_TERMS_FILE, 'r') as f:
+                data = json.load(f)
+                terms = data.get("terms", [])
+                if isinstance(terms, list) and all(isinstance(t, str) for t in terms):
+                    logger.info(f"Loaded {len(terms)} known Jupiter terms from {Config.JUPITER_TERMS_FILE}")
+                    return terms
                 else:
-                    return correct
-        return matched_term
+                    logger.error(f"Invalid format in {Config.JUPITER_TERMS_FILE}. Expected a list of strings under the 'terms' key.")
+                    return []
+        else:
+            logger.warning(f"Known terms file not found: {Config.JUPITER_TERMS_FILE}. Term analysis may be less effective.")
+            return []
+    except json.JSONDecodeError:
+        logger.error(f"Error decoding JSON from {Config.JUPITER_TERMS_FILE}.")
+        return []
+    except Exception as e:
+        logger.error(f"Error loading known terms: {e}", exc_info=True)
+        return []
 
-    # Build the regex pattern
-    pattern = build_terms_regex()
-
-    # Apply the corrections
-    corrected = pattern.sub(replace_term, transcript)
-
-    # Count the number of corrections
-    corrections_count = sum(1 for i, j in zip(transcript, corrected) if i != j)
-    logger.info(f"Made {corrections_count} term corrections")
-
-    return corrected
-
-
-def suggest_term_additions(transcript: str) -> List[str]:
+async def correct_jupiter_terms(transcript: str) -> str:
     """
-    Suggest new terms that might need to be added to the Jupiter terms list.
+    Corrects Jupiter-specific terminology in the transcript using AI analysis
+    and a persistent database of corrections.
 
     Args:
-        transcript (str): The transcript text
+        transcript (str): The transcript text to process.
 
     Returns:
-        List[str]: List of potential new terms
+        str: The transcript with corrections applied.
     """
-    # Look for terms that might be Jupiter-related but aren't in our dictionary
-    # This could include:
-    # 1. Words that frequently appear with "Jupiter" or "JUP"
-    # 2. Capitalized multi-word phrases that appear multiple times
-    # 3. Technical terms related to blockchain/crypto that might be misspelled
+    if not transcript:
+        return ""
 
-    jupiter_context_pattern = r'(?:Jupiter|JUP)\s+([A-Z][a-zA-Z]+)'
-    capitalized_phrases_pattern = r'\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)+)\b'
+    logger.info("Starting Jupiter term correction process...")
 
-    # Find terms in Jupiter context
-    jupiter_context_terms = re.findall(jupiter_context_pattern, transcript)
+    # 1. Load known correct terms
+    known_terms = _load_known_terms()
 
-    # Find capitalized phrases
-    capitalized_phrases = re.findall(capitalized_phrases_pattern, transcript)
+    # 2. Analyze transcript with LLM (async)
+    llm_corrections: Optional[Dict[str, str]] = None
+    if known_terms: # Only run LLM analysis if we have known terms to check against
+        try:
+            llm_corrections = await analyze_transcript_for_term_errors(transcript, known_terms)
+            if llm_corrections:
+                logger.info(f"LLM analysis suggested {len(llm_corrections)} new corrections.")
+                # 3. Add newly identified corrections to the database
+                add_multiple_term_corrections(llm_corrections)
+            else:
+                logger.info("LLM analysis did not suggest any new term corrections.")
+        except Exception as e:
+            logger.error(f"LLM term analysis failed: {e}", exc_info=True)
+            # Continue without LLM suggestions for this run
+            llm_corrections = {} # Ensure it's an empty dict, not None
+    else:
+        logger.warning("Skipping LLM term analysis as no known terms were loaded.")
+        llm_corrections = {}
 
-    # Combine and return unique terms
-    return list(set(jupiter_context_terms + capitalized_phrases))
+
+    # 4. Retrieve all corrections from the database (including newly added ones)
+    # We get ALL corrections every time to ensure consistency
+    all_db_corrections = get_all_term_corrections()
+    if not all_db_corrections:
+        logger.info("No term corrections found in the database. Transcript remains unchanged.")
+        # If LLM also found nothing, we can return early
+        if not llm_corrections:
+             return transcript
+
+    # Combine corrections if needed (DB is usually the superset now)
+    # The DB retrieval is ordered by length desc, which is good for replacement.
+    corrections_to_apply = all_db_corrections
+    logger.info(f"Applying {len(corrections_to_apply)} term corrections from database.")
+
+
+    # 5. Apply corrections to the transcript
+    corrected_transcript = transcript
+    applied_count = 0
+    # Iterate through corrections (already sorted by length desc in get_all_term_corrections)
+    for incorrect, correct in corrections_to_apply.items():
+        # Use regex for case-insensitive replacement and ensure whole words/phrases
+        # \b ensures we match word boundaries, preventing partial matches like "perp" in "perpendicular"
+        # We escape the incorrect term in case it contains regex special characters.
+        # We use re.IGNORECASE for case-insensitivity.
+        pattern = r'\b' + re.escape(incorrect) + r'\b'
+        # Use a lambda function in re.sub to preserve the original case of the first letter
+        # if the correct term is capitalized (e.g., "jupiter" -> "Jupiter")
+        # This is a simple heuristic and might need refinement.
+        def replace_match(match):
+            nonlocal applied_count
+            applied_count += 1
+            # Simple case preservation: if correct term starts with capital, capitalize the match
+            # This might not be perfect for all cases (e.g., acronyms)
+            if correct and correct[0].isupper():
+                 # Basic capitalization of the first letter of the match
+                 # This might not handle multi-word matches perfectly if complex casing is needed
+                 original_match_text = match.group(0)
+                 # A simpler approach might be to just return the 'correct' term directly
+                 # return correct
+                 # Let's try returning the 'correct' term directly for simplicity now
+                 return correct
+            else:
+                # Return the 'correct' term as is (likely lowercase)
+                return correct
+
+        # Perform the substitution
+        # Using re.sub with a function allows counting actual replacements, but is slower.
+        # For performance, a simple re.sub(pattern, correct, corrected_transcript, flags=re.IGNORECASE) might be faster if counting isn't critical per replacement.
+        # Let's stick to the simpler version for now:
+        new_transcript = re.sub(pattern, correct, corrected_transcript, flags=re.IGNORECASE)
+        if new_transcript != corrected_transcript:
+             # Count occurrences replaced by comparing lengths or using finditer if needed precisely
+             # For now, just log that *a* replacement happened for this rule
+             logger.debug(f"Applied correction: '{incorrect}' -> '{correct}'")
+             corrected_transcript = new_transcript
+             # Note: This doesn't count *how many* times the rule was applied in one go.
+
+
+    # logger.info(f"Applied approximately {applied_count} term corrections in total.") # This count isn't accurate with simple re.sub
+    logger.info("Finished applying term corrections.")
+    return corrected_transcript
+
