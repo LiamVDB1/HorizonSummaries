@@ -31,6 +31,8 @@ HESITATIONS = [
 def clean_transcript(transcript: str) -> str:
     """
     Clean and normalize a transcript to improve readability.
+    Handles basic cleanup of transcription artifacts, disfluencies, and formatting.
+    Does NOT handle Jupiter-specific term corrections (that's done separately).
 
     Args:
         transcript (str): Raw transcript text
@@ -40,7 +42,6 @@ def clean_transcript(transcript: str) -> str:
     """
     logger.info("Cleaning transcript")
 
-    # Convert to lowercase for consistency in processing
     text = transcript
 
     # Replace common speech-to-text artifacts
@@ -48,10 +49,8 @@ def clean_transcript(transcript: str) -> str:
         # Number formatting
         r'\b(\d+)\.(\d+)\b': r'\1,\2',  # Fix decimal points that should be commas
 
-        # Correct common misheard words or phrases
-        r'\bjupyter\b': 'Jupiter',
-        r'\bsolana\b': 'Solana',
-        r'\betherium\b': 'Ethereum',
+        # Only the most universal transcription corrections
+        # (Jupiter-specific corrections are handled by term_correction.py)
         r'\bweb tree\b': 'web3',
 
         # Fix common punctuation issues
@@ -102,62 +101,3 @@ def clean_transcript(transcript: str) -> str:
 
     logger.info(f"Transcript cleaned: {len(transcript)} -> {len(text)} characters")
     return text
-
-
-def split_into_paragraphs(text: str) -> List[str]:
-    """
-    Split a transcript into logical paragraphs.
-
-    Args:
-        text (str): Transcript text
-
-    Returns:
-        List[str]: List of paragraphs
-    """
-    # Split on sentences that appear to be topic transitions
-    # Look for patterns like "Moving on to..." or "Let's talk about..." or long pauses
-    transition_patterns = [
-        r'(?<=[.!?])\s+(?=[A-Z][^.!?]{15,}(?:moving on|next|now|let\'s|turning to|shifting to|talking about|discuss))',
-        r'(?<=[.!?])\s+(?=So,\s+[A-Z][^.!?]{10,})',
-        r'(?<=[.!?])\s+(?=[A-Z][^.!?]{0,10}(?:first|second|third|fourth|finally|lastly))'
-    ]
-
-    paragraphs = [text]
-    for pattern in transition_patterns:
-        new_paragraphs = []
-        for p in paragraphs:
-            splits = re.split(pattern, p)
-            new_paragraphs.extend(splits)
-        paragraphs = new_paragraphs
-
-    # Filter out empty paragraphs and strip whitespace
-    return [p.strip() for p in paragraphs if p.strip()]
-
-
-def identify_speakers(transcript: str) -> Dict[str, List[str]]:
-    """
-    Attempt to identify different speakers in a transcript.
-
-    Args:
-        transcript (str): Transcript text
-
-    Returns:
-        Dict[str, List[str]]: Dictionary of speaker -> list of utterances
-    """
-    # Look for patterns like "Speaker: text" or "Name: text"
-    speaker_pattern = r'([A-Z][a-zA-Z\s.]+):\s+([^\n]+(?:\n(?![A-Z][a-zA-Z\s.]+:).*)*)'
-
-    matches = re.findall(speaker_pattern, transcript)
-
-    if not matches:
-        # If no explicit speakers found, return the whole transcript as a single speaker
-        return {"Unknown": [transcript]}
-
-    speakers = {}
-    for speaker, utterance in matches:
-        speaker = speaker.strip()
-        if speaker not in speakers:
-            speakers[speaker] = []
-        speakers[speaker].append(utterance.strip())
-
-    return speakers

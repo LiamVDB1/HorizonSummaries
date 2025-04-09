@@ -7,14 +7,19 @@ from a database and newly identified corrections from an LLM analysis.
 import logging
 import json
 import re
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 
 from src.config import Config
 from src.utils.logger import setup_logger
-from src.database.term_db import get_all_term_corrections, add_multiple_term_corrections
-from src.llm.term_analyzer import analyze_transcript_for_term_errors # Async function
+from src.database.term_db import (
+    get_all_term_corrections,
+    add_multiple_term_corrections,
+    get_term_corrections_with_metadata
+)
+from src.llm.term_analyzer import analyze_transcript_for_term_errors
 
 logger = setup_logger(__name__)
+
 
 def _load_known_terms() -> List[str]:
     """Loads the list of known correct Jupiter terms from the resource file."""
@@ -27,10 +32,12 @@ def _load_known_terms() -> List[str]:
                     logger.info(f"Loaded {len(terms)} known Jupiter terms from {Config.JUPITER_TERMS_FILE}")
                     return terms
                 else:
-                    logger.error(f"Invalid format in {Config.JUPITER_TERMS_FILE}. Expected a list of strings under the 'terms' key.")
+                    logger.error(
+                        f"Invalid format in {Config.JUPITER_TERMS_FILE}. Expected a list of strings under the 'terms' key.")
                     return []
         else:
-            logger.warning(f"Known terms file not found: {Config.JUPITER_TERMS_FILE}. Term analysis may be less effective.")
+            logger.warning(
+                f"Known terms file not found: {Config.JUPITER_TERMS_FILE}. Term analysis may be less effective.")
             return []
     except json.JSONDecodeError:
         logger.error(f"Error decoding JSON from {Config.JUPITER_TERMS_FILE}.")
@@ -39,10 +46,68 @@ def _load_known_terms() -> List[str]:
         logger.error(f"Error loading known terms: {e}", exc_info=True)
         return []
 
+
+def _load_known_names() -> List[str]:
+    """Loads the list of known person names from the resource file."""
+    try:
+        if Config.JUPITER_NAMES_FILE.exists():
+            with open(Config.JUPITER_NAMES_FILE, 'r') as f:
+                data = json.load(f)
+                names = data.get("names", [])
+                if isinstance(names, list) and all(isinstance(n, str) for n in names):
+                    logger.info(f"Loaded {len(names)} known Jupiter names from {Config.JUPITER_NAMES_FILE}")
+                    return names
+                else:
+                    logger.error(
+                        f"Invalid format in {Config.JUPITER_NAMES_FILE}. Expected a list of strings under the 'names' key.")
+                    return []
+        else:
+            logger.warning(f"Known names file not found: {Config.JUPITER_NAMES_FILE}")
+            return []
+    except json.JSONDecodeError:
+        logger.error(f"Error decoding JSON from {Config.JUPITER_NAMES_FILE}.")
+        return []
+    except Exception as e:
+        logger.error(f"Error loading known names: {e}", exc_info=True)
+        return []
+
+
+def _apply_corrections(transcript: str, corrections: Dict[str, str]) -> str:
+    """
+    Applies a dictionary of corrections to the transcript.
+
+    Args:
+        transcript (str): The transcript text to correct.
+        corrections (Dict[str, str]): Dictionary of {incorrect: correct} terms.
+
+    Returns:
+        str: The corrected transcript.
+    """
+    if not corrections:
+        return transcript
+
+    corrected = transcript
+    for incorrect, correct in corrections.items():
+        if not incorrect or not correct:
+            continue
+
+        # Use regex for case-insensitive replacement with word boundaries
+        pattern = r'\b' + re.escape(incorrect) + r'\b'
+        corrected = re.sub(pattern, correct, corrected, flags=re.IGNORECASE)
+
+    return corrected
+
+
 async def correct_jupiter_terms(transcript: str) -> str:
     """
     Corrects Jupiter-specific terminology in the transcript using AI analysis
     and a persistent database of corrections.
+
+    The process:
+    1. Apply high-confidence existing corrections from the database
+    2. Send the partially-corrected transcript to the LLM for analysis
+    3. Store any new corrections in the database
+    4. Apply medium and low confidence corrections that don't conflict
 
     Args:
         transcript (str): The transcript text to process.
@@ -55,88 +120,75 @@ async def correct_jupiter_terms(transcript: str) -> str:
 
     logger.info("Starting Jupiter term correction process...")
 
-    # 1. Load known correct terms
+    # 1. Load known reference data
     known_terms = _load_known_terms()
+    known_names = _load_known_names()
 
-    # 2. Analyze transcript with LLM (async)
-    llm_corrections: Optional[Dict[str, str]] = None
-    if known_terms: # Only run LLM analysis if we have known terms to check against
+    # 2. First apply high-confidence corrections from the database
+    high_confidence_threshold = Config.HIGH_CONFIDENCE_THRESHOLD  # e.g., 0.75
+    high_confidence_corrections = get_all_term_corrections(min_confidence=high_confidence_threshold)
+
+    if high_confidence_corrections:
+        logger.info(f"Applying {len(high_confidence_corrections)} high-confidence existing corrections (confidence >= {high_confidence_threshold})")
+        partially_corrected = _apply_corrections(transcript, high_confidence_corrections)
+    else:
+        logger.info("No high-confidence corrections found in database.")
+        partially_corrected = transcript
+
+    # 3. Analyze the partially-corrected transcript with LLM to find new corrections
+    llm_correction_data = None
+
+    if known_terms or known_names:
         try:
-            llm_corrections = await analyze_transcript_for_term_errors(transcript, known_terms)
-            if llm_corrections:
-                logger.info(f"LLM analysis suggested {len(llm_corrections)} new corrections.")
-                # 3. Add newly identified corrections to the database
-                add_multiple_term_corrections(llm_corrections)
+            llm_correction_data = await analyze_transcript_for_term_errors(
+                partially_corrected,
+                known_terms,
+                known_names
+            )
+
+            if llm_correction_data:
+                logger.info(f"LLM analysis suggested {len(llm_correction_data)} potential corrections.")
+
+                # Store all corrections in the database (even low confidence ones)
+                add_multiple_term_corrections(llm_correction_data)
+
+                # Filter for immediate application based on confidence
+                high_confidence_new = {}
+                for incorrect, data in llm_correction_data.items():
+                    if data.get('confidence', 0) >= high_confidence_threshold:
+                        high_confidence_new[incorrect] = data['term']
+
+                if high_confidence_new:
+                    logger.info(f"Applying {len(high_confidence_new)} new high-confidence corrections")
+                    partially_corrected = _apply_corrections(partially_corrected, high_confidence_new)
             else:
                 logger.info("LLM analysis did not suggest any new term corrections.")
         except Exception as e:
             logger.error(f"LLM term analysis failed: {e}", exc_info=True)
-            # Continue without LLM suggestions for this run
-            llm_corrections = {} # Ensure it's an empty dict, not None
+
+    # 4. Now apply medium-confidence corrections from the database that weren't already applied
+    medium_confidence_threshold = Config.MEDIUM_CONFIDENCE_THRESHOLD  # e.g., 0.6
+
+    # Get all corrections between medium and high thresholds
+    all_corrections = get_term_corrections_with_metadata(
+        min_confidence=medium_confidence_threshold
+    )
+
+    # Filter out corrections that have already been applied
+    medium_corrections = {}
+    for incorrect, data in all_corrections.items():
+        confidence = data.get('confidence', 0)
+        # Only include medium confidence corrections not already in high confidence list
+        if medium_confidence_threshold <= confidence < high_confidence_threshold:
+            if incorrect not in high_confidence_corrections:
+                medium_corrections[incorrect] = data['term']
+
+    if medium_corrections:
+        logger.info(
+            f"Applying {len(medium_corrections)} medium-confidence corrections (confidence between {medium_confidence_threshold} and {high_confidence_threshold})")
+        final_transcript = _apply_corrections(partially_corrected, medium_corrections)
     else:
-        logger.warning("Skipping LLM term analysis as no known terms were loaded.")
-        llm_corrections = {}
+        final_transcript = partially_corrected
 
-
-    # 4. Retrieve all corrections from the database (including newly added ones)
-    # We get ALL corrections every time to ensure consistency
-    all_db_corrections = get_all_term_corrections()
-    if not all_db_corrections:
-        logger.info("No term corrections found in the database. Transcript remains unchanged.")
-        # If LLM also found nothing, we can return early
-        if not llm_corrections:
-             return transcript
-
-    # Combine corrections if needed (DB is usually the superset now)
-    # The DB retrieval is ordered by length desc, which is good for replacement.
-    corrections_to_apply = all_db_corrections
-    logger.info(f"Applying {len(corrections_to_apply)} term corrections from database.")
-
-
-    # 5. Apply corrections to the transcript
-    corrected_transcript = transcript
-    applied_count = 0
-    # Iterate through corrections (already sorted by length desc in get_all_term_corrections)
-    for incorrect, correct in corrections_to_apply.items():
-        # Use regex for case-insensitive replacement and ensure whole words/phrases
-        # \b ensures we match word boundaries, preventing partial matches like "perp" in "perpendicular"
-        # We escape the incorrect term in case it contains regex special characters.
-        # We use re.IGNORECASE for case-insensitivity.
-        pattern = r'\b' + re.escape(incorrect) + r'\b'
-        # Use a lambda function in re.sub to preserve the original case of the first letter
-        # if the correct term is capitalized (e.g., "jupiter" -> "Jupiter")
-        # This is a simple heuristic and might need refinement.
-        def replace_match(match):
-            nonlocal applied_count
-            applied_count += 1
-            # Simple case preservation: if correct term starts with capital, capitalize the match
-            # This might not be perfect for all cases (e.g., acronyms)
-            if correct and correct[0].isupper():
-                 # Basic capitalization of the first letter of the match
-                 # This might not handle multi-word matches perfectly if complex casing is needed
-                 original_match_text = match.group(0)
-                 # A simpler approach might be to just return the 'correct' term directly
-                 # return correct
-                 # Let's try returning the 'correct' term directly for simplicity now
-                 return correct
-            else:
-                # Return the 'correct' term as is (likely lowercase)
-                return correct
-
-        # Perform the substitution
-        # Using re.sub with a function allows counting actual replacements, but is slower.
-        # For performance, a simple re.sub(pattern, correct, corrected_transcript, flags=re.IGNORECASE) might be faster if counting isn't critical per replacement.
-        # Let's stick to the simpler version for now:
-        new_transcript = re.sub(pattern, correct, corrected_transcript, flags=re.IGNORECASE)
-        if new_transcript != corrected_transcript:
-             # Count occurrences replaced by comparing lengths or using finditer if needed precisely
-             # For now, just log that *a* replacement happened for this rule
-             logger.debug(f"Applied correction: '{incorrect}' -> '{correct}'")
-             corrected_transcript = new_transcript
-             # Note: This doesn't count *how many* times the rule was applied in one go.
-
-
-    # logger.info(f"Applied approximately {applied_count} term corrections in total.") # This count isn't accurate with simple re.sub
     logger.info("Finished applying term corrections.")
-    return corrected_transcript
-
+    return final_transcript

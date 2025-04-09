@@ -6,7 +6,6 @@ Transcript preprocessing and enhancement utilities.
 from src.preprocessing.transcript_cleaner import (
     clean_transcript,
     split_into_paragraphs,
-    identify_speakers
 )
 
 # Import topic extraction
@@ -20,7 +19,6 @@ __all__ = [
     # Transcript cleaning
     "clean_transcript",
     "split_into_paragraphs",
-    "identify_speakers",
 
     # Topic extraction
     "extract_topics",

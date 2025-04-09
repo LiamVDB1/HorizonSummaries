@@ -16,8 +16,12 @@ class Config:
     RESOURCES_DIR = DATA_DIR / "resources"
     DATABASE_DIR = DATA_DIR / "database" # New directory for the database
 
+    HIGH_CONFIDENCE_THRESHOLD = 0.75  # Apply before LLM analysis
+    MEDIUM_CONFIDENCE_THRESHOLD = 0.6  # Apply after LLM analysis if not conflicting
+
     # --- Files ---
     JUPITER_TERMS_FILE = RESOURCES_DIR / "jupiter_terms.json" # Path to known terms
+    JUPITER_NAMES_FILE = RESOURCES_DIR / "jupiter_names.json"  # Path to known names
     TERM_DATABASE_FILE = DATABASE_DIR / "term_corrections.db" # Path to SQLite DB
 
     # --- API Credentials (Loaded from .env) ---
@@ -71,19 +75,4 @@ class Config:
 Config.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 Config.DATABASE_DIR.mkdir(parents=True, exist_ok=True)
 Config.RESOURCES_DIR.mkdir(parents=True, exist_ok=True)
-
-# You might want to create an example jupiter_terms.json if it doesn't exist
-example_terms = {
-    "terms": [
-        "Jupiter", "JUP", "LFG Launchpad", "Perps", "Value Average",
-        "Limit Order", "Swap", "Sanctum", "Wen", "Metropolis", "Zeus",
-        "SharkyFi", "deBridge", "Solana", "Pyth", "Birdeye", "meteora",
-        # Add many more known terms here
-    ]
-}
-if not Config.JUPITER_TERMS_FILE.exists():
-    import json
-    with open(Config.JUPITER_TERMS_FILE, 'w') as f:
-        json.dump(example_terms, f, indent=4)
-    print(f"Created example Jupiter terms file at: {Config.JUPITER_TERMS_FILE}")
 
