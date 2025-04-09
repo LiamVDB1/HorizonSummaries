@@ -7,4 +7,4 @@ __version__ = "0.1.0"
 from src.config import Config
 
 # Initialize configurations
-Config.init()
+Config.validate()

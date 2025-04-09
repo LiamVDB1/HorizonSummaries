@@ -24,8 +24,7 @@ DownloaderFunc = Callable[[str], Tuple[Optional[str], Optional[str]]]
 SOURCE_HANDLERS = {
     "youtube": {"checker": is_youtube_url, "downloader": download_youtube_audio},
     "twitter_broadcast": {"checker": is_twitter_broadcast_url, "downloader": download_twitter_broadcast_audio},
-    # Add more sources here (e.g., direct m3u8, vimeo, etc.)
-    # "m3u8": {"checker": is_m3u8_url, "downloader": download_generic_audio},
+    #"m3u8": {"checker": is_m3u8_url, "downloader": download_generic_audio},
 }
 
 def identify_source(url: str) -> Optional[str]:
@@ -45,7 +44,7 @@ def identify_source(url: str) -> Optional[str]:
             return source_type
 
     # Fallback check for direct m3u8 URLs (simple check)
-    if url.lower().endswith(".m3u8"):
+    if re.match(r"^https?://.*\.m3u8$", url):
          logger.info("Identified URL source as: m3u8 (direct)")
          return "m3u8" # Requires a generic downloader
 

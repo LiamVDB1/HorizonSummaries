@@ -48,6 +48,7 @@ class Config:
 
     # --- Logging ---
     LOG_LEVEL = "INFO"
+    LOG_FILE = os.path.join(PROJECT_ROOT, "horizon_summaries.log")
 
     # --- Error Handling ---
     MAX_RETRIES = 3
