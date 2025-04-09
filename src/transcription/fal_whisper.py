@@ -11,6 +11,7 @@ from typing import List, Optional
 import fal_client
 from fal_client import InProgress, Queued, Completed
 from pydub import AudioSegment
+from tqdm.asyncio import tqdm as async_tqdm
 
 from src.config import Config
 
@@ -29,7 +30,7 @@ def split_audio(file_path: str, max_size_mb: int = None) -> List[str]:
         List[str]: List of paths to the audio chunks
     """
     max_size_mb = max_size_mb or Config.MAX_AUDIO_SIZE_MB
-    logger.info(f"Checking if audio needs to be split (max size: {max_size_mb}MB)")
+    logger.debug(f"Checking if audio needs to be split (max size: {max_size_mb}MB)")
 
     # Load the audio file using pydub
     audio = AudioSegment.from_file(file_path)
@@ -38,13 +39,13 @@ def split_audio(file_path: str, max_size_mb: int = None) -> List[str]:
     file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
     if file_size_mb <= max_size_mb:
         # If the file size is within the limit, create a temporary copy
-        logger.info(f"Audio size ({file_size_mb:.2f}MB) is within limit, no splitting needed")
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3", dir=Config.TEMP_DIR)
+        logger.debug(f"Audio size ({file_size_mb:.2f}MB) is within limit, no splitting needed")
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         audio.export(temp_file.name, format="mp3")
         return [temp_file.name]
 
     # Split the audio into smaller chunks if it exceeds the maximum file size
-    logger.info(f"Audio size ({file_size_mb:.2f}MB) exceeds limit, splitting into {max_size_mb}MB chunks")
+    logger.debug(f"Audio size ({file_size_mb:.2f}MB) exceeds limit, splitting into {max_size_mb}MB chunks")
     chunk_length_ms = len(audio) * (max_size_mb / file_size_mb)
     overlap_ms = 200  # 0.2-second overlap
     chunks = [audio[i:i + int(chunk_length_ms) + overlap_ms] for i in range(0, len(audio), int(chunk_length_ms))]
@@ -52,15 +53,15 @@ def split_audio(file_path: str, max_size_mb: int = None) -> List[str]:
     # Export each chunk to a temporary file
     chunk_files = []
     for i, chunk in enumerate(chunks):
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=f"_chunk{i}.mp3", dir=Config.TEMP_DIR)
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=f"_chunk{i}.mp3")
         chunk.export(temp_file.name, format="mp3")
         chunk_files.append(temp_file.name)
 
-    logger.info(f"Split audio into {len(chunk_files)} chunks")
+    logger.info(f"Audio size ({file_size_mb:.2f}MB) exceeds limit, split into {len(chunk_files)} chunks of {max_size_mb}MB")
     return chunk_files
 
 
-async def submit_transcription_job(audio_url: str) -> str:
+async def submit_transcription_job(audio_url: str, model:str = "wizper") -> str:
     """
     Submit a transcription job to FalAI.
 
@@ -71,7 +72,7 @@ async def submit_transcription_job(audio_url: str) -> str:
         str: Request ID
     """
     handler = await fal_client.submit_async(
-        "fal-ai/wizper",
+        f"fal-ai/{model}",
         arguments={
             "audio_url": audio_url
         },
@@ -79,7 +80,7 @@ async def submit_transcription_job(audio_url: str) -> str:
     return handler.request_id
 
 
-async def transcribe_chunk(temp_file_path: str, max_tries: int = 5, current_retry: int = 0) -> Optional[str]:
+async def transcribe_chunk(temp_file_path: str, max_tries: int = 5, current_retry: int = 0, model: str = "wizper") -> Optional[str]:
     """
     Transcribe an audio chunk using FalAI Whisper.
 
@@ -92,31 +93,31 @@ async def transcribe_chunk(temp_file_path: str, max_tries: int = 5, current_retr
         Optional[str]: Transcription text if successful, None otherwise
     """
     try:
-        logger.info(f"Uploading audio chunk: {os.path.basename(temp_file_path)}")
+        logger.debug(f"Uploading audio chunk: {os.path.basename(temp_file_path)}")
         data_url = await fal_client.upload_file_async(temp_file_path)
 
-        logger.info(f"Submitting transcription job for chunk: {os.path.basename(temp_file_path)}")
-        request_id = await submit_transcription_job(data_url)
-        logger.info(f"Submitted transcription job with ID: {request_id}")
+        logger.debug(f"Submitting transcription job for chunk: {os.path.basename(temp_file_path)}")
+        request_id = await submit_transcription_job(data_url, model)
+        logger.debug(f"Submitted transcription job with ID: {request_id}")
 
         # Check job status
-        status = await fal_client.status_async("fal-ai/wizper", request_id, with_logs=True)
+        status = await fal_client.status_async(f"fal-ai/{model}", request_id, with_logs=True)
 
         # Wait for job to complete
         while isinstance(status, InProgress) or isinstance(status, Queued):
-            logger.info(f"Job status: {type(status).__name__}, waiting...")
+            logger.debug(f"Job status: {type(status).__name__}, waiting...")
             await asyncio.sleep(5)
-            status = await fal_client.status_async("fal-ai/wizper", request_id, with_logs=True)
+            status = await fal_client.status_async(f"fal-ai/{model}", request_id, with_logs=True)
 
         # Check if job completed successfully
         if isinstance(status, Completed):
-            logger.info(f"Transcription complete for chunk: {os.path.basename(temp_file_path)}")
-            result = await fal_client.result_async("fal-ai/wizper", request_id)
+            logger.debug(f"Transcription complete for chunk: {os.path.basename(temp_file_path)}")
+            result = await fal_client.result_async(f"fal-ai/{model}", request_id)
             return result["text"]
         else:
             logger.warning(f"Job failed with status: {type(status).__name__}")
             if current_retry < max_tries:
-                logger.info(f"Retrying transcription (attempt {current_retry + 1}/{max_tries})")
+                logger.debug(f"Retrying transcription (attempt {current_retry + 1}/{max_tries})")
                 return await transcribe_chunk(temp_file_path, max_tries, current_retry + 1)
             else:
                 logger.error(f"Max retries reached. Failed to transcribe {os.path.basename(temp_file_path)}")
@@ -125,7 +126,7 @@ async def transcribe_chunk(temp_file_path: str, max_tries: int = 5, current_retr
     except Exception as e:
         logger.error(f"Error during transcription: {str(e)}")
         if current_retry < max_tries:
-            logger.info(f"Retrying transcription after error (attempt {current_retry + 1}/{max_tries})")
+            logger.debug(f"Retrying transcription after error (attempt {current_retry + 1}/{max_tries})")
             await asyncio.sleep(2 ** current_retry)  # Exponential backoff
             return await transcribe_chunk(temp_file_path, max_tries, current_retry + 1)
         else:
@@ -133,7 +134,7 @@ async def transcribe_chunk(temp_file_path: str, max_tries: int = 5, current_retr
             return None
 
 
-async def transcribe_audio_async(file_path: str) -> Optional[str]:
+async def transcribe_audio_async(file_path: str, model: str = None) -> Optional[str]:
     """
     Transcribe an audio file using FalAI Whisper.
 
@@ -151,6 +152,8 @@ async def transcribe_audio_async(file_path: str) -> Optional[str]:
 
     os.environ["FAL_KEY"] = token
 
+    whisper_model = model or Config.FALAI_WHISPER_MODEL
+
     # Make sure the file exists
     if not os.path.exists(file_path):
         logger.error(f"Audio file not found: {file_path}")
@@ -162,8 +165,8 @@ async def transcribe_audio_async(file_path: str) -> Optional[str]:
     try:
         # Transcribe each chunk asynchronously
         logger.info(f"Transcribing {len(audio_files)} audio chunks")
-        tasks = [transcribe_chunk(chunk_path) for chunk_path in audio_files]
-        transcriptions = await asyncio.gather(*tasks)
+        tasks = [transcribe_chunk(chunk_path, model=whisper_model) for chunk_path in audio_files]
+        transcriptions = await async_tqdm.gather(*tasks, desc="Transcribing audio", unit="chunk", total=len(audio_files))
 
         # Filter out None values (failed transcriptions)
         transcriptions = [t for t in transcriptions if t]
@@ -183,10 +186,10 @@ async def transcribe_audio_async(file_path: str) -> Optional[str]:
         for audio_file in audio_files:
             if os.path.exists(audio_file):
                 os.remove(audio_file)
-                logger.info(f"Removed temporary file: {audio_file}")
+                logger.debug(f"Removed temporary file: {audio_file}")
 
 
-def transcribe_audio(file_path: str) -> str:
+def transcribe_audio(file_path: str, model: str = None) -> str:
     """
     Synchronous wrapper for transcribe_audio_async.
 
@@ -196,7 +199,7 @@ def transcribe_audio(file_path: str) -> str:
     Returns:
         str: Transcription text
     """
-    result = asyncio.run(transcribe_audio_async(file_path))
+    result = asyncio.run(transcribe_audio_async(file_path, model))
     if result is None:
         raise RuntimeError("Transcription failed")
     return result

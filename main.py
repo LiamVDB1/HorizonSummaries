@@ -94,7 +94,8 @@ async def process_video(video_url: str, prompt_type: str, model_name: str = None
         audio_path, video_title = download_audio(video_url)
         if not audio_path or not os.path.exists(audio_path):
             raise RuntimeError(f"Failed to download audio from {video_url}")
-        if not video_title: video_title = f"Unknown_Video_{timestamp}"
+        if not video_title:
+            video_title = f"Unknown_Video_{timestamp}"
         logger.info(f"Audio downloaded successfully to: {audio_path}")
         logger.info(f"Video Title: {video_title}")
 

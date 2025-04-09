@@ -36,7 +36,7 @@ class Config:
     SUMMARIZATION_MODEL = os.getenv("SUMMARIZATION_MODEL", DEFAULT_MODEL)
 
     # --- Transcription Settings ---
-    FALAI_WHISPER_MODEL = "large-v3" # Or your preferred Whisper model on FalAI
+    FALAI_WHISPER_MODEL = "wizper"
 
     # --- Downloader Settings ---
     YT_DLP_FORMAT = "bestaudio/best"
