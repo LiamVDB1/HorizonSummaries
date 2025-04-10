@@ -149,11 +149,11 @@ async def generate_text(
 # --- Specific Task Functions ---
 
 async def generate_summary(
-    transcript: str,
-    prompt_template: str,
-    topics: Optional[List[str]] = None,
-    model_name: str = Config.SUMMARIZATION_MODEL,
-    **kwargs # Allow passing other generate_text args like temperature
+        transcript: str,
+        prompt_template: str,
+        topics: List[Dict[str, Any]],
+        model_name: str = Config.SUMMARIZATION_MODEL,
+        **kwargs  # Allow passing other generate_text args like temperature
 ) -> str:
     """
     Generates a summary for a given transcript using a specific prompt template.
@@ -161,8 +161,9 @@ async def generate_summary(
     Args:
         transcript (str): The text content to summarize.
         prompt_template (str): The template string for the summarization prompt.
-                               Should contain placeholders like {transcript} and optionally {topics}.
-        topics (list[str], optional): A list of key topics extracted from the transcript.
+                               Should contain placeholders like {transcript} and {topics}.
+        topics (list): A list of key topics extracted from the transcript (either strings or
+                      rich topic objects with metadata).
         model_name (str): The Vertex AI model to use for summarization.
         **kwargs: Additional arguments passed to generate_text.
 
@@ -170,8 +171,36 @@ async def generate_summary(
         str: The generated summary.
     """
     logger.info(f"Generating summary using model: {model_name}")
+
+    # Format topics based on their structure
+    if topics and isinstance(topics[0], dict):
+        # Rich topic format - create a detailed topics section
+        topics_formatted = "\n\n**Key Topics:**\n"
+        for topic in topics:
+            relevance = topic.get('relevance', 'medium')
+            confidence = topic.get('confidence', 0.7)
+            # Only include high and medium relevance topics with decent confidence
+            if relevance in ['high', 'medium'] and confidence >= 0.7:
+                topics_formatted += f"\n### {topic['topic']}\n"
+
+                # Add key points if available
+                if 'key_points' in topic and topic['key_points']:
+                    topics_formatted += "Key points:\n"
+                    for point in topic['key_points']:
+                        topics_formatted += f"- {point}\n"
+
+                # Add category if available
+                if 'category' in topic and topic['category']:
+                    topics_formatted += f"Category: {topic['category']}\n"
+    else:
+        # Simple format - just comma-separated topics
+        topics_formatted = ", ".join(topics) if topics else "No specific topics extracted"
+
     # Format the prompt
-    prompt = prompt_template.format(transcript=transcript, topics=", ".join(topics) if topics else "N/A")
+    prompt = prompt_template.format(
+        transcript=transcript,
+        topics=topics_formatted
+    )
 
     # Define a system instruction specific to summarization
     system_instruction = """You are an expert summarizer specializing in blockchain and crypto project communications, particularly for the Jupiter ecosystem on Solana. Your goal is to create clear, concise, and engaging summaries from transcripts. Focus on key decisions, announcements, technical details, community sentiment, and action items. Use Markdown formatting for readability."""
