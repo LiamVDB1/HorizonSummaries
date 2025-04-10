@@ -20,7 +20,7 @@ from src.utils.logger import setup_logger
 from src.utils.file_handling import save_to_file, ensure_directory, sanitize_filename
 from src.database.term_db import initialize_database as init_term_db
 from src.downloaders.common import download_audio
-from src.transcription.fal_whisper import transcribe_audio
+from src.transcription.fal_whisper import transcribe_audio_async
 from src.preprocessing.transcript_cleaner import clean_transcript
 from src.preprocessing.term_correction import correct_jupiter_terms
 from src.preprocessing.topic_extraction import extract_topics
@@ -67,7 +67,6 @@ async def process_video(video_url: str, prompt_type: str, model_name: str = None
     logger.info("--- Starting Video Processing Pipeline ---")
     try:
         init_term_db()
-        init_vertex()
         Config.validate()
     except Exception as init_error:
         logger.error(f"Initialization failed: {init_error}", exc_info=True)
@@ -94,7 +93,7 @@ async def process_video(video_url: str, prompt_type: str, model_name: str = None
 
         # 2. Transcribe Audio
         logger.info("Transcribing audio...")
-        transcript = transcribe_audio(audio_path, model=Config.FALAI_WHISPER_MODEL)
+        transcript = await transcribe_audio_async(audio_path, model=Config.FALAI_WHISPER_MODEL)
         if not transcript: raise RuntimeError("Transcription failed or returned empty.")
         logger.info("Transcription completed.")
         raw_transcript_path = output_dir / f"{base_filename}_transcript_raw.txt"
@@ -115,7 +114,14 @@ async def process_video(video_url: str, prompt_type: str, model_name: str = None
         logger.info("Extracting topics...")
         topics = await extract_topics(corrected_transcript)
         if topics:
-            logger.info(f"Extracted topics: {', '.join(topics)}")
+            if isinstance(topics[0], dict):
+                # Handle rich topic objects
+                topic_names = [topic.get('topic', '') for topic in topics if
+                               isinstance(topic, dict) and 'topic' in topic]
+                logger.info(f"Extracted topics: {', '.join(topic_names)}")
+            else:
+                # Handle simple string topics
+                logger.info(f"Extracted topics: {', '.join(topics)}")
         else:
             logger.warning("No topics were extracted.")
         processed_transcript_path = output_dir / f"{base_filename}_transcript_processed.txt"
@@ -197,7 +203,8 @@ if __name__ == "__main__":
     # Specify the prompt type (must match a filename in data/prompts without .txt)
     prompt_type_to_use = "office_hours"
 
-    model_override = 'gemini-2.5-pro-exp-03-25'
+    #model_override = 'gemini-2.5-pro-exp-03-25'
+    model_override = None # Use the default model
 
     main(video_url=video_url_to_process,
          prompt_type=prompt_type_to_use,

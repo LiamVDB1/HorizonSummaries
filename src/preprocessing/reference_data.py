@@ -40,16 +40,16 @@ def load_people_context() -> Dict[str, Any]:
     Returns the full context data.
     """
     try:
-        if Config.JUPITER_NAMES_FILE.exists():
-            with open(Config.JUPITER_NAMES_FILE, 'r') as f:
+        if Config.JUPITER_PEOPLE_FILE.exists():
+            with open(Config.JUPITER_PEOPLE_FILE, 'r') as f:
                 data = json.load(f)
-                logger.info(f"Loaded full name context from {Config.JUPITER_NAMES_FILE}")
+                logger.info(f"Loaded full name context from {Config.JUPITER_PEOPLE_FILE}")
                 return data
         else:
-            logger.warning(f"Known names file not found: {Config.JUPITER_NAMES_FILE}")
+            logger.warning(f"Known names file not found: {Config.JUPITER_PEOPLE_FILE}")
             return {"people": []}
     except json.JSONDecodeError:
-        logger.error(f"Error decoding JSON from {Config.JUPITER_NAMES_FILE}")
+        logger.error(f"Error decoding JSON from {Config.JUPITER_PEOPLE_FILE}")
         return {"people": []}
     except Exception as e:
         logger.error(f"Error loading name context: {e}", exc_info=True)
@@ -193,3 +193,45 @@ def get_known_names() -> List[str]:
     names = extract_people_list(name_data)
     logger.info(f"Extracted {len(names)} known Jupiter People")
     return names
+
+
+if __name__ == "__main__":
+    # Test the loading and formatting functions
+    print("Testing Jupiter reference data utilities...")
+
+    # Load and display term data
+    term_data = load_term_context()
+    print(f"\nLoaded {len(term_data.get('terms', []))} terms from reference file")
+
+    # Extract simple term list
+    terms_list = extract_terms_list(term_data)
+    print(f"Extracted {len(terms_list)} terms (including acronyms)")
+    if terms_list:
+        print(f"Sample terms: {terms_list[:5]}")
+
+    # Format terms for prompt
+    formatted_terms = format_terms_for_prompt(term_data)
+    print("\nSample of formatted terms for prompt:")
+    print(formatted_terms[:500] + "...\n")
+
+    # Load and display people data
+    people_data = load_people_context()
+    print(f"\nLoaded {len(people_data.get('people', []))} people from reference file")
+
+    # Extract simple people list
+    people_list = extract_people_list(people_data)
+    print(f"Extracted {len(people_list)} names (including nicknames)")
+    if people_list:
+        print(f"Sample names: {people_list[:5]}")
+
+    # Format people for prompt
+    formatted_people = format_people_for_prompt(people_data)
+    print("\nSample of formatted people for prompt:")
+    print(formatted_people[:500] + "...\n")
+
+    # Test the convenience functions
+    known_terms = get_known_terms()
+    known_names = get_known_names()
+
+    print(f"\nConvenience function get_known_terms() returned {len(known_terms)} terms")
+    print(f"Convenience function get_known_names() returned {len(known_names)} names")

@@ -18,7 +18,7 @@ class Config:
     # --- Directories ---
     DATA_DIR = PROJECT_ROOT / "data"
     OUTPUT_DIR = DATA_DIR / "output"
-    PROMPT_DIR = DATA_DIR / "prompts"
+    PROMPTS_DIR = DATA_DIR / "prompts"
     RESOURCES_DIR = DATA_DIR / "resources"
     DATABASE_DIR = DATA_DIR / "database" # New directory for the database
 
@@ -49,6 +49,7 @@ class Config:
 
     # --- Transcription Settings ---
     FALAI_WHISPER_MODEL = "wizper"
+    MAX_AUDIO_SIZE_MB = 50
 
     # --- Downloader Settings ---
     YT_DLP_FORMAT = "bestaudio/best"
@@ -59,7 +60,8 @@ class Config:
     MIN_TERM_CORRECTION_CONFIDENCE = 0.8 # Example threshold (adjust as needed)
 
     # --- Logging ---
-    LOG_LEVEL = "INFO"
+    #LOG_LEVEL = "INFO"
+    LOG_LEVEL = "DEBUG"
     LOG_FILE = os.path.join(PROJECT_ROOT, "horizon_summaries.log")
 
     # --- Error Handling ---

@@ -45,7 +45,7 @@ def setup_logger(logger_name: str, log_file: Optional[str] = None) -> logging.Lo
         logger.handlers.clear()
 
     # Console handler with colors
-    if colorlog and sys.stdout.isatty():  # Use colors only if colorlog is available and in a terminal
+    if colorlog:  # Use colors only if colorlog is available and in a terminal
         # Color mapping
         color_formatter = colorlog.ColoredFormatter(
             "%(log_color)s[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s%(reset)s",
@@ -63,6 +63,7 @@ def setup_logger(logger_name: str, log_file: Optional[str] = None) -> logging.Lo
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(color_formatter)
     else:
+        logger.warning("Colorlog not available. Using standard logging format.")
         # Standard formatter without colors
         standard_formatter = logging.Formatter(
             "[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",

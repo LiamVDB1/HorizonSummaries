@@ -54,12 +54,7 @@ def clean_transcript(transcript: str) -> str:
         r'\bweb tree\b': 'web3',
 
         # Fix common punctuation issues
-        r'(?<=[.!?])\s+(?=[a-z])': lambda m: m.group(0).upper(),  # Capitalize after periods
         r'\s+([,.;:!?])': r'\1',  # Remove space before punctuation
-
-        # Fix quotation marks
-        r'(?<=\w)"(?=\s|$)': '"',  # Close quotes properly
-        r'(?<=\s|^)"(?=\w)': '"',  # Open quotes properly
     }
 
     # Apply replacements
@@ -68,6 +63,16 @@ def clean_transcript(transcript: str) -> str:
             text = re.sub(pattern, replacement, text)
         else:
             text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+
+    # Fix quotation marks - without using look-behind/look-ahead with variable width
+    text = re.sub(r'(\w)"(\s|$)', r'\1"\2', text)  # Close quotes properly
+    text = re.sub(r'(\s|^)"(\w)', r'\1"\2', text)  # Open quotes properly
+
+    # Capitalize sentences - avoid using look-behind with variable width pattern
+    def capitalize_after_period(match):
+        return match.group(1) + match.group(2).upper()
+
+    text = re.sub(r'([.!?])\s+([a-z])', capitalize_after_period, text)
 
     # Remove filler words
     for filler in FILLER_WORDS:
@@ -90,11 +95,15 @@ def clean_transcript(transcript: str) -> str:
     # Ensure proper spacing around punctuation
     text = re.sub(r'(\w)([,.;:!?])(\w)', r'\1\2 \3', text)
 
-    # Ensure sentences start with capital letters
-    text = re.sub(r'(?<=[.!?]\s)([a-z])', lambda m: m.group(1).upper(), text)
+    # Ensure sentences start with capital letters - without look-behind
+    pattern = r'([.!?])\s+([a-z])'
+    text = re.sub(pattern, lambda m: m.group(1) + ' ' + m.group(2).upper(), text)
 
-    # Fix spacing in common abbreviations
-    text = re.sub(r'(?<=\w)\.(?=\w)', '. ', text)
+    # Fix spacing in common abbreviations - without look-behind/look-ahead
+    def fix_abbrev_spacing(match):
+        return match.group(1) + '. ' + match.group(2)
+
+    text = re.sub(r'(\w)\.(\w)', fix_abbrev_spacing, text)
 
     # Final cleanup of any remaining whitespace issues
     text = re.sub(r'\s+', ' ', text).strip()

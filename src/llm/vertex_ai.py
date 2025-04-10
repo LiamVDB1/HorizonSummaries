@@ -34,8 +34,8 @@ class VertexAIGenerator:
 
         self.client = genai.Client(
             vertexai=True,
-            project=os.getenv("GOOGLE_PROJECT_ID"),
-            location=os.getenv("GOOGLE_REGION")
+            project=Config.GOOGLE_PROJECT_ID,
+            location=Config.GOOGLE_REGION,
         )
 
         # Rate limiting parameters
@@ -83,6 +83,8 @@ class VertexAIGenerator:
         """
         retry_count = 0
         last_error = None
+        logger.info(f"Generating response with retry logic")
+        logger.debug(f"Prompt: {prompt}")
 
         while retry_count <= self.max_retries:
             try:
@@ -104,33 +106,20 @@ class VertexAIGenerator:
                 last_error = str(e)
                 logger.warning(f"Error in generate_response: {last_error}")
 
-                # Check if it's a quota error
-                if self._handle_quota_error(last_error):
-                    if retry_count >= self.max_retries:
-                        logger.error(f"Max retries ({self.max_retries}) exceeded due to quota limits.")
-                        raise QuotaExceededException(
-                            f"Max retries ({self.max_retries}) exceeded due to quota limits. "
-                            "Consider implementing request queuing or increasing quotas."
-                        )
+                if retry_count >= self.max_retries:
+                    logger.error(f"Max retries ({self.max_retries}) reached")
+                    raise e
 
-                    delay = self._calculate_retry_delay(retry_count)
-                    logger.info(
-                        f"Quota exceeded, retrying in {delay:.2f} seconds (attempt {retry_count + 1}/{self.max_retries})")
-                    await asyncio.sleep(delay)
-                    retry_count += 1
+                delay = self._calculate_retry_delay(retry_count)
+                logger.info(
+                    f"Retrying in {delay:.2f} seconds (attempt {retry_count + 1}/{self.max_retries})")
+                await asyncio.sleep(delay)
+                retry_count += 1
 
-                    # Try lesser model on alternate retries if not already using it
-                    if not lesser_model and retry_count % 2 == 1:
-                        logger.info("Attempting with lesser model...")
-                        lesser_model = True
-                        self.set_model_id(lesser_model=True)
-                else:
-                    # Not a quota error, raise immediately
-                    logger.error(f"Error generating response: {last_error}")
-                    raise
-
-        # This should never be reached due to the raise in the loop
-        raise QuotaExceededException("Unexpected state in retry loop")
+                # Try lesser model on alternate retries if not already using it
+                if not model == Config.LESSER_MODEL and retry_count > 2 and retry_count % 2 == 1:
+                    logger.info("Attempting with lesser model...")
+                    model = Config.LESSER_MODEL
 
     async def generate_response(
             self,
@@ -183,3 +172,26 @@ class VertexAIGenerator:
         }
 
         return {"content": response.text, "metadata": metadata}
+
+
+async def main():
+    num_expansions = 3
+
+    json_schema = {
+        "type": "array",
+        "items": {
+            "type": "string"
+        },
+        "minItems": num_expansions,
+        "maxItems": num_expansions,
+        "description": "Array of query variations including the original query"
+    }
+
+    generator = VertexAIGenerator()
+    result = await generator.generate_response_with_retry(
+        "What is the meaning of life?"
+    )
+    print(result)
+
+if __name__ == "__main__":
+    asyncio.run(main())

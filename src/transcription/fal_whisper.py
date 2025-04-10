@@ -18,7 +18,7 @@ from src.config import Config
 logger = logging.getLogger("horizon_summaries")
 
 
-def split_audio(file_path: str, max_size_mb: int = None) -> List[str]:
+def split_audio(file_path: str, max_size_mb: int = 50) -> List[str]:
     """
     Split audio file into smaller chunks if it exceeds the maximum size.
 
