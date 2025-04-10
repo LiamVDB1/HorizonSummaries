@@ -5,9 +5,8 @@ from a database and newly identified corrections from an LLM analysis.
 """
 
 import logging
-import json
 import re
-from typing import List, Dict, Optional, Any
+from typing import Dict, Optional, Any
 
 from src.config import Config
 from src.utils.logger import setup_logger
@@ -17,59 +16,12 @@ from src.database.term_db import (
     get_term_corrections_with_metadata
 )
 from src.llm.term_analyzer import analyze_transcript_for_term_errors
+from src.preprocessing.reference_data import (
+    load_term_context,
+    load_people_context
+)
 
 logger = setup_logger(__name__)
-
-
-def _load_known_terms() -> List[str]:
-    """Loads the list of known correct Jupiter terms from the resource file."""
-    try:
-        if Config.JUPITER_TERMS_FILE.exists():
-            with open(Config.JUPITER_TERMS_FILE, 'r') as f:
-                data = json.load(f)
-                terms = data.get("terms", [])
-                if isinstance(terms, list) and all(isinstance(t, str) for t in terms):
-                    logger.info(f"Loaded {len(terms)} known Jupiter terms from {Config.JUPITER_TERMS_FILE}")
-                    return terms
-                else:
-                    logger.error(
-                        f"Invalid format in {Config.JUPITER_TERMS_FILE}. Expected a list of strings under the 'terms' key.")
-                    return []
-        else:
-            logger.warning(
-                f"Known terms file not found: {Config.JUPITER_TERMS_FILE}. Term analysis may be less effective.")
-            return []
-    except json.JSONDecodeError:
-        logger.error(f"Error decoding JSON from {Config.JUPITER_TERMS_FILE}.")
-        return []
-    except Exception as e:
-        logger.error(f"Error loading known terms: {e}", exc_info=True)
-        return []
-
-
-def _load_known_names() -> List[str]:
-    """Loads the list of known person names from the resource file."""
-    try:
-        if Config.JUPITER_NAMES_FILE.exists():
-            with open(Config.JUPITER_NAMES_FILE, 'r') as f:
-                data = json.load(f)
-                names = data.get("names", [])
-                if isinstance(names, list) and all(isinstance(n, str) for n in names):
-                    logger.info(f"Loaded {len(names)} known Jupiter names from {Config.JUPITER_NAMES_FILE}")
-                    return names
-                else:
-                    logger.error(
-                        f"Invalid format in {Config.JUPITER_NAMES_FILE}. Expected a list of strings under the 'names' key.")
-                    return []
-        else:
-            logger.warning(f"Known names file not found: {Config.JUPITER_NAMES_FILE}")
-            return []
-    except json.JSONDecodeError:
-        logger.error(f"Error decoding JSON from {Config.JUPITER_NAMES_FILE}.")
-        return []
-    except Exception as e:
-        logger.error(f"Error loading known names: {e}", exc_info=True)
-        return []
 
 
 def _apply_corrections(transcript: str, corrections: Dict[str, str]) -> str:
@@ -120,16 +72,17 @@ async def correct_jupiter_terms(transcript: str) -> str:
 
     logger.info("Starting Jupiter term correction process...")
 
-    # 1. Load known reference data
-    known_terms = _load_known_terms()
-    known_names = _load_known_names()
+    # 1. Load reference data
+    term_data = load_term_context()
+    people_data = load_people_context()
 
     # 2. First apply high-confidence corrections from the database
     high_confidence_threshold = Config.HIGH_CONFIDENCE_THRESHOLD  # e.g., 0.75
     high_confidence_corrections = get_all_term_corrections(min_confidence=high_confidence_threshold)
 
     if high_confidence_corrections:
-        logger.info(f"Applying {len(high_confidence_corrections)} high-confidence existing corrections (confidence >= {high_confidence_threshold})")
+        logger.info(
+            f"Applying {len(high_confidence_corrections)} high-confidence existing corrections (confidence >= {high_confidence_threshold})")
         partially_corrected = _apply_corrections(transcript, high_confidence_corrections)
     else:
         logger.info("No high-confidence corrections found in database.")
@@ -138,12 +91,13 @@ async def correct_jupiter_terms(transcript: str) -> str:
     # 3. Analyze the partially-corrected transcript with LLM to find new corrections
     llm_correction_data = None
 
-    if known_terms or known_names:
+    if term_data.get("terms") or people_data.get("people"):
         try:
+            # Use the LLM analyzer with just the reference data (simplified API)
             llm_correction_data = await analyze_transcript_for_term_errors(
                 partially_corrected,
-                known_terms,
-                known_names
+                term_data,
+                people_data
             )
 
             if llm_correction_data:

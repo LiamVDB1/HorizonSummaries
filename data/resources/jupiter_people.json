@@ -1,0 +1,196 @@
+{
+  "people": [
+    {
+      "name": "Meow",
+      "nicknames": ["weremeow"],
+      "role": "Co-founder",
+      "description": "Co-founder of Jupiter. Writes foundational content about Jupiter's vision. A key contributor to Jupiter's community and strategic direction."
+    },
+    {
+      "name": "Siong",
+      "nicknames": ["sssionggg"],
+      "role": "Co-founder",
+      "description": "Co-founder of Jupiter alongside Meow."
+    },
+    {
+      "name": "Kash",
+      "nicknames": ["kashdhanda"],
+      "role": "Uplink Working Group",
+      "description": "Leader of the Uplink Working Group (also part of the Jupiter Team), focusing on product & partnership, community spotlight, LFG candidates communications, and leading community calls."
+    },
+    {
+      "name": "Mei",
+      "nicknames": ["9yointern"],
+      "role": "Team Member",
+      "description": "A valuable team member at Jupiter."
+    },
+    {
+      "name": "Soju",
+      "nicknames": ["0xSoju"],
+      "role": "Team Member",
+      "description": "Recently moved to Meteora."
+    },
+    {
+      "name": "Slorg",
+      "nicknames": ["SlorgoftheSlugs"],
+      "role": "Core Working Group (CWG)",
+      "description": "Leader in the Core Working Group, which is responsible for community management, core processes, and ecosystem rituals."
+    },
+    {
+      "name": "Kemosabe",
+      "nicknames": ["kemos4be"],
+      "role": "Core Working Group (CWG)",
+      "description": "Member of the Core Working Group focused on community and moderator management."
+    },
+    {
+      "name": "Morten",
+      "nicknames": ["MessiasMorten"],
+      "role": "Core Working Group (CWG)",
+      "description": "Software Developer part of the Core Working Group,"
+    },
+    {
+      "name": "AG",
+      "nicknames": [],
+      "role": "Core Working Group (CWG)",
+      "description": "Member of the Core Working Group assisting with Jup Mobile adoption."
+    },
+    {
+      "name": "JPorta",
+      "nicknames": [],
+      "role": "Core Working Group (CWG)",
+      "description": "Member of the Core Working Group."
+    },
+    {
+      "name": "c2yptic",
+      "nicknames": [],
+      "role": "Core Working Group (CWG)",
+      "description": "Retired member of the Core Working Group, with experience across various DAOs and communities."
+    },
+    {
+      "name": "Molu",
+      "nicknames": ["moludotsol"],
+      "role": "Uplink Working Group",
+      "description": "Member of the Uplink Working Group focused on content creation."
+    },
+    {
+      "name": "OG",
+      "nicknames": ["rganizedgeneral"],
+      "role": "Uplink working group",
+      "description": "Main member of the Uplink working group, focused on the operations of the working group."
+    },
+    {
+      "name": "WillMcFletcher",
+      "nicknames": [],
+      "role": "Uplink Working Group",
+      "description": "Member of the Uplink Working Group focused on content creation and Jupiter memes."
+    },
+    {
+      "name": "Clouds",
+      "nicknames": ["FamousClouzz"],
+      "role": "Uplink Working Group",
+      "description": "Member of the Uplink Working Group focused on content creation."
+    },
+    {
+      "name": "Julian",
+      "nicknames": ["julianhzhu"],
+      "role": "Catdet Working Group",
+      "description": "Leader of the Catdet Working Group, also deeply acquanted with the team, known for community updates, event organization. And CAWG software creation"
+    },
+    {
+      "name": "Rolex",
+      "nicknames": ["RolexGoldTweets"],
+      "role": "Catdet Working Group",
+      "description": "Member of the Catdet Working Group, focused on growing the JupCatdets twitter account"
+    },
+    {
+      "name": "Catoshi",
+      "nicknames": [],
+      "role": "Catdet Working Group",
+      "description": "Catoshi is a professional spot trader and a CoC passionate about growing the Jupiter and Solana ecosystems."
+    },
+    {
+      "name": "Opacks",
+      "nicknames": [],
+      "role": "Catdet Working Group",
+      "description": "Member of the Catdet Working Group, focused on growing the Jupiter Reddit"
+    },
+    {
+      "name": "Cas",
+      "nicknames": ["CasCusic", "Bingbongdiddly"],
+      "role": "Catdet Working Group",
+      "description": "Main Member of the Catdet Working Group known for community updates and event organization."
+    },
+    {
+      "name": "Wake",
+      "nicknames": [],
+      "role": "Jup&Juice",
+      "description": "Co-host of the Jup&Juice podcast team, which shares insights and updates from the Jupiter community."
+    },
+    {
+      "name": "Sax",
+      "nicknames": [],
+      "role": "Jup&Juice",
+      "description": "Leader and co-host of the Jup&Juice podcast team."
+    },
+    {
+      "name": "Irish",
+      "nicknames": [],
+      "role": "Jup&Juice",
+      "description": "Member of the Jup&Juice podcast team. Focused on connecting with people, and handling the behind-the-scenes of the podcast"
+    },
+    {
+      "name": "Satchel",
+      "nicknames": [],
+      "role": "Jup&Juice",
+      "description": "Member of the Jup&Juice podcast team. Focused on editing and delivering quality content."
+    },
+    {
+      "name": "Monique",
+      "nicknames": [],
+      "role": "Jup&Juice",
+      "description": "Member of the Jup&Juice podcast team."
+    },
+    {
+      "name": "Konstantinos",
+      "nicknames": [],
+      "role": "Developer Relations",
+      "description": "Leader of the Developer Relations team at Jupiter. Co-Creator of catalytics.pro"
+    },
+    {
+      "name": "Fiji",
+      "nicknames": [],
+      "role": "Developer Relations",
+      "description": "Member of the Developer Relations team at Jupiter. Dev-chat warrior, Co-creator of catalytics.pro"
+    },
+    {
+      "name": "Dan",
+      "nicknames": [],
+      "role": "Developer Relations",
+      "description": "Member of the Developer Relations team at Jupiter. Created the Jupiverse-kit, for easily integrating the Jupiter-API."
+    },
+    {
+      "name": "Adedamolajoke",
+      "nicknames": ["AJ", "Adeda"],
+      "role": "Design",
+      "description": "Leader of the Design working group, has done a ton of design work for Jupiter, including for Catstanbul, and the 'Welcome to Solana' Page."
+    },
+    {
+      "name": "Lochie",
+      "nicknames": ["lochiejarvis201"],
+      "role": "Content Creator",
+      "description": "Content creator for Jupiter. Known for making educational threads about Jupiter and Solana"
+    },
+    {
+      "name": "doctorpreballin",
+      "nicknames": [],
+      "role": "Content Creator",
+      "description": "Content creator for Jupiter. Known for creating music for Jupiter"
+    },
+    {
+      "name": "RJ",
+      "nicknames": [],
+      "role": "Content Creator",
+      "description": "Content creator for Jupiter. Known for making amazing graphics and high quality threads about Jupiter."
+    }
+  ]
+}

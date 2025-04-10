@@ -1,83 +1,424 @@
 {
   "terms": [
-    "Jupiter",
-    "JUP",
-    "Jupiverse",
-    "Jupuary",
-    "Jup&Juice",
-    "Catdet",
-    "CoC",
-    "Cats of Culture",
-    "J4J",
-    "JUP for JUP",
-    "PPP",
-    "Player Pump Player",
-    "Planetary Call",
-    "Catstanbul",
-    "JupSOL",
-    "JLP",
-    "Jupiter Liquidity Pool",
-    "Dollar Cost Averaging",
-    "DCA",
-    "DEX",
-    "Limit Order",
-    "Swap",
-    "Ape Pro",
-    "Memecoin",
-    "LFG",
-    "LFG Launchpad",
-    "Perps",
-    "Perpetuals",
-    "Staking",
-    "DAO",
-    "Uplink",
-    "Uplink Working Group",
-    "Core Working Group",
-    "CWG",
-    "CAWG",
-    "Catdet Working Group",
-    "SpaceStation",
-    "JupResearch",
-    "GUM",
-    "Giant Unified Market",
-    "Metropolis",
-    "Office Hours",
-    "Jup.ag",
-    "Token Swap",
-    "weremeow",
-    "Meow",
-    "sssionggg",
-    "Siong",
-    "Solana",
-    "USDC",
-    "USDT",
-    "BONK",
-    "SOL",
-    "Web3",
-    "DeFi",
-    "Layer 1",
-    "Layer 2",
-    "Jup.eco",
-    "JupCatdets",
-    "Jup Mobile",
-    "Jup DAO",
-    "Terminal",
-    "Tokenomics",
-    "NFT",
-    "Active Staking Rewards",
-    "ASR",
-    "Farming",
-    "Yield",
-    "Airdrop",
-    "Catdet&CoC",
-    "Liquidity Pool",
-    "Jupiter Perpetuals Exchange",
-    "Wen",
-    "Station.jup.ag",
-    "Vote.jup.ag",
-    "Jussy_world",
-    "Jupiter Horizon",
-    "Juphorizon.com",
-    "JUPreddit"
+    {
+      "term": "Jupiter",
+      "acronyms": [],
+      "description": "Jupiter is a comprehensive DeFi platform on Solana, renowned for its swap aggregator and essential DeFi infrastructure.",
+      "related_terms": ["Jupiverse", "Jup.ag", "Solana", "DEX"]
+    },
+    {
+      "term": "JUP",
+      "acronyms": [],
+      "description": "JUP is the native token of the Jupiter ecosystem, used for governance and rewards.",
+      "related_terms": ["Tokenomics", "Staking", "DAO", "JLP", "JupSOL"]
+    },
+    {
+      "term": "Jupiverse",
+      "acronyms": [],
+      "description": "The Jupiverse encompasses the entire Jupiter ecosystem, including its products, community, and governance.",
+      "related_terms": ["Jupiter", "JupCatdets", "DAO", "Jup.eco"]
+    },
+    {
+      "term": "Jupuary",
+      "acronyms": [],
+      "description": "Jupuary was a promotional period in January associated with Jupiter initiatives, potentially including the JUP token airdrop.",
+      "related_terms": ["Airdrop", "JUP", "Community Events"]
+    },
+    {
+      "term": "Jup&Juice",
+      "acronyms": ["J&J"],
+      "description": "Jup&Juice is a community podcast (Working group) that discusses developments within the Jupiter and broader Solana ecosystem. Members: Wake, Sax, Irish, Monique.",
+      "related_terms": ["Planetary Call", "Office Hours", "Community"]
+    },
+    {
+      "term": "Catdet",
+      "acronyms": [],
+      "description": "Catdets are active and engaged members of the Jupiter community who contribute to the ecosystem.",
+      "related_terms": ["JupCatdets", "Cats of Culture", "CAWG", "Community"]
+    },
+    {
+      "term": "CoC",
+      "acronyms": ["Cats of Culture"],
+      "description": "Cats of Culture are recognized cultural leaders within the Jupiter community, driving community efforts.",
+      "related_terms": ["Catdet", "Catdet&CoC", "Community Leaders"]
+    },
+    {
+      "term": "J4J",
+      "acronyms": ["JUP for JUP"],
+      "description": "J4J represents a spirit of mutual support within the Jupiter community, fostering growth and success.",
+      "related_terms": ["PPP", "Community", "Jupiverse"]
+    },
+    {
+      "term": "PPP",
+      "acronyms": ["Peer Pump Peer"],
+      "description": "PPP is a J4J-inspired ethos emphasizing support among Catdets within the Jupiter ecosystem.",
+      "related_terms": ["J4J", "Catdet", "Community Support"]
+    },
+    {
+      "term": "Planetary Call",
+      "acronyms": [],
+      "description": "Planetary Calls are regular live events where Jupiter shares strategies, updates, and plans with the community.",
+      "related_terms": ["Office Hours", "Jup&Juice", "Community Updates"]
+    },
+    {
+      "term": "Catstanbul",
+      "acronyms": [],
+      "description": "Catstanbul was a Jupiter community event held in Istanbul, bringing members together.",
+      "related_terms": ["Catdet", "CoC", "Community Event"]
+    },
+    {
+      "term": "JupSOL",
+      "acronyms": [],
+      "description": "JupSOL is Jupiter’s liquid staking token (LST) representing SOL staked to the Jupiter validator, which earns staking yields and MEV kickbacks.",
+      "related_terms": ["SOL", "LST", "Staking", "MEV"]
+    },
+    {
+      "term": "JLP",
+      "acronyms": ["Jupiter Liquidity Provider"],
+      "description": "JLP is the token representing liquidity within Jupiter's perpetuals trading, allowing holders to earn fees from leveraged trades.",
+      "related_terms": ["Liquidity Pool", "Perpetual Trading", "Leveraged Positions"]
+    },
+    {
+      "term": "DCA",
+      "acronyms": ["Dollar Cost Averaging"],
+      "description": "Dollar Cost Averaging is an investment strategy of regularly purchasing assets regardless of price.",
+      "related_terms": ["Value Averaging", "Trading Tools"]
+    },
+    {
+      "term": "DEX",
+      "acronyms": ["Decentralized Exchange"],
+      "description": "A Decentralized Exchange is a platform for trading cryptocurrencies without a central authority.",
+      "related_terms": ["Swap", "Limit Order", "Perps", "Solana"]
+    },
+    {
+      "term": "Limit Order",
+      "acronyms": [],
+      "description": "A Limit Order is an order to buy or sell an asset at a specified price.",
+      "related_terms": ["Swap", "DEX", "Trading Tools"]
+    },
+    {
+      "term": "Swap",
+      "acronyms": ["Token Swap"],
+      "description": "Swapping refers to exchanging one cryptocurrency for another.",
+      "related_terms": ["DEX", "Limit Order", "Jup.ag"]
+    },
+    {
+      "term": "Ape Pro",
+      "acronyms": ["Trenches"],
+      "description": "Ape Pro/Trenches is Jupiter's memecoin terminal, offering pro-performance trading with mobile optimization, social logins, and advanced data.",
+      "related_terms": ["Trenches","Memecoin", "Trading", "Mobile", "Web3Auth", "MPC wallet"]
+    },
+    {
+      "term": "JupTrenches",
+      "acronyms": ["Trenches"],
+      "description": "JupTrenches is Jupiter's advanced trading platform, designed for seamless memecoin trading with low fees, real-time data, and enhanced user experience.",
+      "related_terms": ["Ape Pro", "Memecoin", "Trading", "User Experience", "Mobile Optimization", "Web3Auth"]
+    },
+    {
+      "term": "Memecoin",
+      "acronyms": [],
+      "description": "A Memecoin is a cryptocurrency created based on internet memes or jokes.",
+      "related_terms": ["BONK", "Moonshot", "Community"]
+    },
+    {
+      "term": "LFG Launchpad",
+      "acronyms": ["LFG", "Let's Fucking Go"],
+      "description": "The LFG Launchpad was Jupiter's platform for launching new projects on Solana, with V2 updates coming.",
+      "related_terms": ["Moonshot", "Claimpad", "Project Launch"]
+    },
+    {
+      "term": "Perps",
+      "acronyms": ["Perpetuals"],
+      "description": "Perps refers to perpetual futures contracts trading on Jupiter, allowing leveraged speculation.",
+      "related_terms": ["Jupiter Perpetuals Exchange", "DEX", "Trading", "JLP"]
+    },
+    {
+      "term": "Staking",
+      "acronyms": [],
+      "description": "Staking $JUP allows users to participate in governance and earn Active Staking Rewards (ASR) by voting on proposals.",
+      "related_terms": ["Active Staking Rewards", "ASR", "vote.jup.ag", "JUP", "Governance"]
+    },
+    {
+      "term": "DAO",
+      "acronyms": ["Decentralized Autonomous Organization"],
+      "description": "The Jupiter DAO empowers $JUP holders to shape the platform's future through governance and voting on key proposals.",
+      "related_terms": ["JUP", "Governance", "vote.jup.ag", "Working Groups", "Jupiverse"]
+    },
+    {
+      "term": "Uplink Working Group",
+      "acronyms": ["Uplink", "UWG"],
+      "description": "Uplink WG amplifies Jupiter's core narratives and fosters community growth through content creation and communication. (Hosts Planetary Calls), Key Members: Kash, OrganizedGeneral, Molu, Will",
+      "related_terms": ["Working Group", "Community", "Content Creation", "Jupiverse", "Planetary Calls"]
+    },
+    {
+      "term": "Core Working Group",
+      "acronyms": ["CWG"],
+      "description": "The Core Working Group (CWG) guides the governance processes and operational strategies of the Jupiter ecosystem.",
+      "related_terms": ["Working Group", "Governance", "DAO", "Jupiverse", "Community Engagement"]
+    },
+    {
+      "term": "Catdet Working Group",
+      "acronyms": ["CAWG"],
+      "description": "The Catdet Working Group (CAWG) fosters community engagement and culture within Jupiter by supporting Catdets and promoting initiatives.",
+      "related_terms": ["Catdet", "Community Engagement", "Working Group", "Jupiverse", "Events"]
+    },
+    {
+      "term": "SpaceStation",
+      "acronyms": [],
+      "description": "SpaceStation is Jupiter's comprehensive documentation hub, offering resources for users and developers to navigate the ecosystem.",
+      "related_terms": ["Documentation", "Station.jup.ag", "Guides", "APIs"]
+    },
+    {
+      "term": "Dev.jup.ag",
+      "acronyms": [],
+      "description": "Dev.jup.ag is the developer portal for the Jupiter ecosystem, providing resources, APIs, and documentation for integrating with Jupiter's services.",
+      "related_terms": ["API", "Documentation", "Developer Hub", "Jupiter Integration", "Technical Resources"]
+    },
+    {
+      "term": "Jupiverse.zendesk.com",
+      "acronyms": [],
+      "description": "Jupiverse.zendesk.com is the support portal for the Jupiter community, offering FAQs, guides, and assistance for users.",
+      "related_terms": ["Guides", "Customer Support", "Help Center", "FAQs", "Community Resources", "User Assistance"]
+    },
+    {
+      "term": "JupResearch",
+      "acronyms": [],
+      "description": "JupResearch is a collaborative research platform within the Jupiter ecosystem, facilitating discussions, proposals, and insights from the community.",
+      "related_terms": ["Community Proposals", "Research Forum", "Ecosystem Development"]
+    },
+    {
+      "term": "Giant Unified Market",
+      "acronyms": ["GUM"],
+      "description": "The Giant Unified Market (GUM) is Jupiter's initiative to integrate diverse asset classes and unify liquidity across Solana, enhancing accessibility and trading efficiency.",
+      "related_terms": ["DEX", "Liquidity Pool", "Asset Integration", "Decentralized Finance", "Cross-Asset Trading"]
+    },
+    {
+      "term": "Metropolis",
+      "acronyms": [],
+      "description": "Metropolis is a significant upgrade for Jupiter, enhancing liquidity integration, trading efficiency, and user experience across the ecosystem.",
+      "related_terms": ["Edge Site", "Liquidity APIs", "Token API", "Swap API", "User Experience"]
+    },
+    {
+      "term": "Office Hours",
+      "acronyms": [],
+      "description": "Office Hours are regular community calls hosted by the Core Working Group, providing updates, discussions, and Q&A sessions to engage with the community.",
+      "related_terms": ["Planetary Call", "Jup&Juice", "Community Engagement", "Updates", "Governance"]
+    },
+    {
+      "term": "Jup.ag",
+      "acronyms": [],
+      "description": "Jup.ag is Jupiter's main website address for the swap platform.",
+      "related_terms": ["Jupiter", "Jup.eco"]
+    },
+    {
+      "term": "Solana",
+      "acronyms": ["SOL"],
+      "description": "Solana is the high-performance blockchain that Jupiter is built on.",
+      "related_terms": ["Web3", "Layer 1"]
+    },
+    {
+      "term": "USDC",
+      "acronyms": ["USD Coin"],
+      "description": "USDC is a stablecoin pegged to the US dollar, commonly used on Jupiter.",
+      "related_terms": ["USDT", "DeFi"]
+    },
+    {
+      "term": "USDT",
+      "acronyms": ["Tether"],
+      "description": "USDT is a stablecoin pegged to the US dollar, commonly used on Jupiter.",
+      "related_terms": ["USDC", "DeFi"]
+    },
+    {
+      "term": "BONK",
+      "acronyms": [],
+      "description": "BONK is a popular Solana-based memecoin that trades on Jupiter.",
+      "related_terms": ["Memecoin", "SOL"]
+    },
+    {
+      "term": "SOL",
+      "acronyms": [],
+      "description": "SOL is the native token of the Solana blockchain.",
+      "related_terms": ["Solana", "JupSOL"]
+    },
+    {
+      "term": "Web3",
+      "acronyms": [],
+      "description": "Web3 is the next generation of internet based on blockchain technology.",
+      "related_terms": ["DeFi", "DAO"]
+    },
+    {
+      "term": "DeFi",
+      "acronyms": ["Decentralized Finance"],
+      "description": "DeFi refers to financial applications built on blockchain technology.",
+      "related_terms": ["Web3", "DEX"]
+    },
+    {
+      "term": "Layer 1",
+      "acronyms": ["L1"],
+      "description": "Layer 1 refers to base blockchain protocols like Solana.",
+      "related_terms": ["Layer 2", "Solana"]
+    },
+    {
+      "term": "Layer 2",
+      "acronyms": ["L2"],
+      "description": "Layer 2 refers to scaling solutions built on top of base blockchains.",
+      "related_terms": ["Layer 1", "Solana"]
+    },
+    {
+      "term": "Jup.eco",
+      "acronyms": [],
+      "description": "Jup.eco is Jupiter's dedicated ecosystem platform, serving as a hub for community resources, governance information, and project updates.",
+      "related_terms": ["Jup.ag", "Jupiter", "Community Resources", "Governance", "Ecosystem Development"]
+    },
+    {
+      "term": "Jup Mobile",
+      "acronyms": [],
+      "description": "Jup Mobile is Jupiter's mobile application.",
+      "related_terms": ["Jup.ag", "Swap"]
+    },
+    {
+      "term": "Jup DAO",
+      "acronyms": [],
+      "description": "Jup DAO is Jupiter's decentralized autonomous organization for governance.",
+      "related_terms": ["DAO", "Vote.jup.ag"]
+    },
+    {
+      "term": "Terminal",
+      "acronyms": ["terminal.jup.ag"],
+      "description": "Terminal is a developer-friendly interface for integrating Jupiter's APIs, enabling seamless access to trading functionalities and liquidity.",
+      "related_terms": ["Dev.jup.ag", "API Integration", "Jupiter APIs", "Liquidity", "Trading Interface"]
+    },
+    {
+      "term": "Tokenomics",
+      "acronyms": [],
+      "description": "Tokenomics refers to the economic model and distribution of the JUP token.",
+      "related_terms": ["JUP", "Staking"]
+    },
+    {
+      "term": "NFT",
+      "acronyms": ["Non-Fungible Token"],
+      "description": "NFTs are unique digital assets that can be traded on blockchain.",
+      "related_terms": ["Web3", "DeFi"]
+    },
+    {
+      "term": "Active Staking Rewards",
+      "acronyms": ["ASR"],
+      "description": "Active Staking Rewards (ASR) are incentives for $JUP holders who actively participate in governance by voting on proposals, enhancing community engagement.",
+      "related_terms": ["Staking", "Governance", "JupLock", "Voting", "DAO"]
+    },
+    {
+      "term": "Farming",
+      "acronyms": ["Yield Farming"],
+      "description": "Farming involves providing liquidity to earn rewards in DeFi protocols.",
+      "related_terms": ["Yield", "Liquidity Pool"]
+    },
+    {
+      "term": "Yield",
+      "acronyms": [],
+      "description": "Yield refers to returns earned from DeFi activities like staking or farming.",
+      "related_terms": ["Farming", "Staking"]
+    },
+    {
+      "term": "Airdrop",
+      "acronyms": [],
+      "description": "An Airdrop is a free distribution of tokens to wallet addresses.",
+      "related_terms": ["JUP", "Tokenomics"]
+    },
+    {
+      "term": "Catdet&CoC",
+      "acronyms": [],
+      "description": "Catdet&CoC represents the combined community roles of Catdets and Cats of Culture.",
+      "related_terms": ["Catdet", "CoC"]
+    },
+    {
+      "term": "Liquidity Pool",
+      "acronyms": ["LP"],
+      "description": "A Liquidity Pool is a collection of funds locked in a smart contract for trading.",
+      "related_terms": ["JLP", "Farming"]
+    },
+    {
+      "term": "Jupiter Perpetuals Exchange",
+      "acronyms": [],
+      "description": "Jupiter Perpetuals Exchange is Jupiter's platform for trading perpetual futures contracts.",
+      "related_terms": ["Perps", "DEX"]
+    },
+    {
+      "term": "Wen",
+      "acronyms": [],
+      "description": "\"Wen\" is crypto slang for 'when', often used to inquire about release dates.",
+      "related_terms": []
+    },
+    {
+      "term": "Vote.jup.ag",
+      "acronyms": [],
+      "description": "Vote.jup.ag is Jupiter's governance voting platform, enabling $JUP holders to participate in decision-making by voting on proposals and initiatives.",
+      "related_terms": ["DAO", "Jup DAO", "Governance", "Voting Power", "Proposals"]
+    },
+    {
+      "term": "Jupiter Horizon",
+      "acronyms": [],
+      "description": "Jupiter Horizon is an AI-driven assistant and content hub designed to provide users with instant access to information, updates, and resources within the Jupiter ecosystem.",
+      "related_terms": ["Juphorizon.com", "Community Engagement", "Governance", "DeFi Resources", "User Assistance"]
+    },
+    {
+      "term": "JUPreddit",
+      "acronyms": [],
+      "description": "JUPreddit is the Jupiter community on Reddit.",
+      "related_terms": ["JupNet"]
+    },
+    {
+      "term": "JupNet",
+      "acronyms": [],
+      "description": "JupNet is Jupiter's omnichain network aimed at aggregating liquidity and enabling seamless interactions across multiple blockchains within the ecosystem.",
+      "related_terms": ["Omnichain", "Liquidity Aggregation", "Cross-Chain", "Jupiter Ecosystem", "Community Engagement"]
+    },
+    {
+      "term": "Value Averaging",
+      "acronyms": ["VA"],
+      "description": "Value Averaging (VA) is an investment strategy that dynamically adjusts investment amounts based on market performance, aiming to optimize portfolio growth over time.",
+      "related_terms": ["Dollar-Cost Averaging", "Jupiter", "Investment Strategy", "Market Performance", "Portfolio Management"]
+    },
+    {
+      "term": "JupLock",
+      "acronyms": [],
+      "description": "JupLock is a transparent token locking mechanism designed for projects within the Solana ecosystem, allowing teams to securely lock their tokens and manage vesting schedules.",
+      "related_terms": ["Token Locking", "Token Vesting", "Project Transparency", "Security", "Community Trust"]
+    },
+    {
+      "term": "Edge Site",
+      "acronyms": [],
+      "description": "Edge Site is Jupiter's experimental platform for testing cutting-edge features and enhancements before they are launched on the main site, aimed at improving user experience and functionality.",
+      "related_terms": ["Metropolis", "Beta Features", "User Testing", "Innovation", "Jupiter Ecosystem"]
+    },
+    {
+      "term": "Claimpad",
+      "acronyms": [],
+      "description": "Claimpad is a Jupiter platform that facilitates the distribution of tokens to a large number of users, providing a secure and reliable way to claim airdrops. It leverages Jupiter's infrastructure to ensure smooth and scalable token distribution for top Solana projects.",
+      "related_terms": ["LFG", "CATpad", "Airdrop", "Token Launch", "TNSR"]
+    },
+    {
+      "term": "C.A.T.",
+      "acronyms": ["Certainty, Alignment, Transparency"],
+      "description": "C.A.T. (Certainty, Alignment, Transparency) is a Jupiter initiative focused on building trust through clear token distribution, stakeholder alignment, and transparency in decision-making.",
+      "related_terms": ["CatPad", "JUP", "Governance", "Jupiter Lock"]
+    },
+    {
+      "term": "RFQ",
+      "acronyms": ["Request For Quote"],
+      "description": "RFQ (Request For Quote) is a feature on Jupiter that allows users to swap tokens with zero slippage and no gas fees by sourcing off-chain liquidity from market makers. It provides a way to execute trades, especially on Edge, with potentially better prices by comparing on-chain and off-chain liquidity.",
+      "related_terms": ["Edge", "Jupiter Swap", "Slippage", "Gas Fees", "Market Makers"]
+    },
+    {
+      "term": "DOVEs",
+      "acronyms": ["Decentralized Oracles that Validate and Execute"],
+      "description": "DOVEs (Decentralized Oracles that Validate and Execute) are a proposed decentralized system within the Jupiter ecosystem designed to reach consensus on external events, internal state changes, and the execution of external transactions. They are a key component of Jupnet, aiming to aggregate all of crypto into a single decentralized ledger.",
+      "related_terms": ["Jupnet", "Decentralized Oracles", "Validator"]
+    },
+    {
+      "term": "Global Decentralized Stock Exchange",
+      "acronyms": ["GDSE"],
+      "description": "The Global Decentralized Stock Exchange (GDSE) is Jupiter's vision to become a comprehensive platform where various assets, including real-world assets (RWAs), crypto, stocks, and commodities, can be seamlessly traded. It represents Jupiter's ambition to disrupt traditional finance by bringing off-chain companies and assets on-chain.",
+      "related_terms": ["DeFi", "RWA", "Jupiter", "GUM", "TradFi"]
+    }
   ]
 }

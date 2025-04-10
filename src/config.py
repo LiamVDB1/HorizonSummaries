@@ -21,7 +21,7 @@ class Config:
 
     # --- Files ---
     JUPITER_TERMS_FILE = RESOURCES_DIR / "jupiter_terms.json" # Path to known terms
-    JUPITER_NAMES_FILE = RESOURCES_DIR / "jupiter_names.json"  # Path to known names
+    JUPITER_PEOPLE_FILE = RESOURCES_DIR / "jupiter_people.json"  # Path to known names
     TERM_DATABASE_FILE = DATABASE_DIR / "term_corrections.db" # Path to SQLite DB
 
     # --- API Credentials (Loaded from .env) ---

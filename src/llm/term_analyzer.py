@@ -4,11 +4,12 @@ or variations of known Jupiter-related terms.
 """
 
 import logging
-import json
 from typing import List, Dict, Optional, Any
 
 from src.config import Config
 from src.llm.vertex_ai import generate_text, parse_json_from_llm, initialize_vertex_ai
+from src.preprocessing.reference_data import format_terms_for_prompt, format_people_for_prompt, extract_terms_list, \
+    extract_people_list
 from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -18,8 +19,8 @@ initialize_vertex_ai()
 
 async def analyze_transcript_for_term_errors(
     transcript: str,
-    known_terms: List[str],
-    known_names: Optional[List[str]] = None,
+    term_data: Optional[List[str]] = None,
+    people_data: Optional[List[str]] = None,
     model_name: str = Config.TERM_ANALYSIS_MODEL
 ) -> Optional[Dict[str, Dict[str, Any]]]:
     """
@@ -28,8 +29,8 @@ async def analyze_transcript_for_term_errors(
 
     Args:
         transcript (str): The transcript text to analyze.
-        known_terms (List[str]): A list of correct Jupiter-related terms.
-        known_names (List[str], optional): A list of correct person names.
+        term_data (Dict[str, Any]): Rich term context data.
+        name_data (Dict[str, Any]): Rich name context data.
         model_name (str): The Vertex AI model to use for analysis.
 
     Returns:
@@ -41,29 +42,28 @@ async def analyze_transcript_for_term_errors(
     if not transcript:
         logger.warning("Transcript is empty, skipping term analysis.")
         return None
-    if not known_terms and not known_names:
-        logger.warning("Both known terms and names lists are empty, skipping term analysis.")
+
+    # Extract simplified lists for validation (moved from parameters to internal extraction)
+    known_terms = extract_terms_list(term_data)
+    known_people = extract_people_list(people_data)
+
+    if not known_terms and not known_people:
+        logger.warning("Both known terms and people lists are empty, skipping term analysis.")
         return None
 
     logger.info(f"Starting term analysis with model: {model_name}")
 
-    # Format the lists of known terms and names for the prompt
-    terms_list = ', '.join(known_terms) if known_terms else "No specific terms provided"
-    names_list = ', '.join(known_names) if known_names else "No specific names provided"
+    # Format the rich context data for the prompt
+    terms_context = format_terms_for_prompt(term_data)
+    people_context = format_people_for_prompt(people_data)
 
-    # --- Enhanced Prompt Engineering ---
+    # --- Enhanced Prompt Engineering with Full Context ---
     prompt = f"""
-Analyze the following transcript for potential misspellings, mishearings, or incorrect variations of the provided known Jupiter ecosystem terms and names.
+Analyze the following transcript for potential misspellings, mishearings, or incorrect variations of Jupiter ecosystem terms and people.
 
-**Known Correct Terms:**
-```
-{terms_list}
-```
+{terms_context}
 
-**Known Correct Person Names:**
-```
-{names_list}
-```
+{people_context}
 
 **Transcript:**
 ```
@@ -72,11 +72,11 @@ Analyze the following transcript for potential misspellings, mishearings, or inc
 
 **Instructions:**
 1. Read through the transcript carefully.
-2. Identify words or phrases that seem like incorrect versions of the "Known Correct Terms" or "Known Correct Person Names".
+2. Identify words or phrases that seem like incorrect versions of Jupiter Terms or Jupiter people's names.
 3. For each identified incorrect term:
-   - Determine the most likely correct term from the provided lists
+   - Determine the most likely correct term from the provided reference data
    - Assign a confidence score (0.0-1.0) based on your certainty
-   - Provide brief reasoning for your correction and confidence score, ~1 line
+   - Provide brief reasoning for your correction and confidence score
    - Identify the type of correction ('term', 'person', 'acronym')
 4. Respond ONLY with a valid JSON object in this format:
 ```json
@@ -85,7 +85,7 @@ Analyze the following transcript for potential misspellings, mishearings, or inc
     "term": "correct_term", 
     "confidence": 0.0 <= confidence_score <= 1.0,
     "reasoning": "Brief explanation of why this correction was made",
-    "correction_type": "term" | "person" | "acronym"
+    "correction_type": "term"
   }}
 }}
 ```
@@ -115,6 +115,12 @@ Analyze the following transcript for potential misspellings, mishearings, or inc
     "reasoning": "Based on context, appears to be referring to the Devrel Working group member",
     "correction_type": "person"
   }}
+- "Siong Li" → {{
+    "term": "Siong", 
+    "confidence": 0.92,
+    "reasoning": "Referencing the Co-founder by full name instead of common name",
+    "correction_type": "person"
+  }}
 
 **Important Guidelines:**
 - Consider how the term is used in context
@@ -123,23 +129,21 @@ Analyze the following transcript for potential misspellings, mishearings, or inc
 - Watch for playful name variations that might be intentional (assign lower confidence)
 - Do not correct terms that appear to be intentional variations or jokes
 - Consider the frequency of appearance for confidence scoring
-- Pay attention to surrounding context when choosing between ambiguous corrections!
-
-Note: It is possible there are no corrections to be made. In that case, return an empty JSON object {{}}.
+- Pay attention to surrounding context when choosing between ambiguous corrections
 
 **JSON Response:**
 """
 
-    # Define a system instruction specific to this task
-    system_instruction = """You are an AI assistant specialized in analyzing text transcripts from the Solana and Jupiter ecosystem. Your task is to identify and correct misspellings or variations of specific known terms based on provided lists. You must output your findings strictly as a JSON object mapping incorrect terms to detailed correction information including confidence scores and reasoning."""
+    # System instruction for term analysis
+    system_instruction = """You are an AI assistant specialized in analyzing text transcripts from the Solana and Jupiter ecosystem. Your task is to identify and correct misspellings or variations of specific known terms and names based on the comprehensive reference data provided. You must output your findings strictly as a JSON object mapping incorrect terms to detailed correction information including confidence scores and reasoning."""
 
     try:
         # Generate the analysis using the core vertex_ai function
         raw_llm_output = await generate_text(
             prompt=prompt,
             model_name=model_name,
-            temperature=0.2, # Lower temperature for more deterministic analysis
-            max_output_tokens=2048, # Increased for detailed responses
+            temperature=0.2,  # Lower temperature for more deterministic analysis
+            max_output_tokens=4096,  # Increased for detailed responses with rich context
             system_instruction=system_instruction
         )
 
@@ -177,7 +181,7 @@ Note: It is possible there are no corrections to be made. In that case, return a
 
             if 'correction_type' not in correction_data:
                 # Try to auto-detect if it's a person name
-                if known_names and correction_data['term'] in known_names:
+                if known_people and correction_data['term'] in known_people:
                     correction_data['correction_type'] = 'person'
                 else:
                     correction_data['correction_type'] = 'term'

@@ -125,8 +125,10 @@ async def process_video(video_url: str, prompt_type: str, model_name: str = None
         # 5. Extract Topics
         logger.info("Extracting topics...")
         topics = await extract_topics(corrected_transcript)
-        if topics: logger.info(f"Extracted topics: {', '.join(topics)}")
-        else: logger.warning("No topics were extracted.")
+        if topics:
+            logger.info(f"Extracted topics: {', '.join(topics)}")
+        else:
+            logger.warning("No topics were extracted.")
         processed_transcript_path = output_dir / f"{base_filename}_transcript_processed.txt"
         save_to_file(corrected_transcript, processed_transcript_path)
         logger.info(f"Processed transcript saved to {processed_transcript_path}")
