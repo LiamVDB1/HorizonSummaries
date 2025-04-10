@@ -23,6 +23,10 @@ from src.preprocessing.reference_data import (
 
 logger = setup_logger(__name__)
 
+PROTECTED_TERMS = [
+    "Drip",  # This is a legitimate team name
+    "Moonshot"
+]
 
 def _apply_corrections(transcript: str, corrections: Dict[str, str]) -> str:
     """
@@ -41,6 +45,9 @@ def _apply_corrections(transcript: str, corrections: Dict[str, str]) -> str:
     corrected = transcript
     for incorrect, correct in corrections.items():
         if not incorrect or not correct:
+            continue
+
+        if incorrect in PROTECTED_TERMS:
             continue
 
         # Use regex for case-insensitive replacement with word boundaries

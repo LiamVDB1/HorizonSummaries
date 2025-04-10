@@ -30,6 +30,8 @@ The LFG Launchpad empowers the community to decide which new projects within the
 
 With this comprehensive framework, Jupiter has become a central hub of decentralized finance, fostering community participation while advancing DeFi on Solana"
 
+{JUPITER_CONTEXT}
+
 I will first give you an example. The structure of your Recap should follow the structure of this example.
 Example:
 "🎉 Jupiter Office Hours Recap: JUPITER'S HOME! 🚀
@@ -84,8 +86,8 @@ Another electrifying Jupiter Office Hours has wrapped, packed with community vib
 
 This Office Hours ignited a spark of collaborative energy. The "Jupiter's Home" campaign is just the beginning! Get involved, share your voice, and help shape the future of Jupiter! LFG! ✨"
 
-Key topics from the transcript: {TOPICS}
+{TOPICS}
 
 **Base the entire recap post ONLY on the following transcript.**
 **Transcript:**
-{TRANSCRIPT}s
+{TRANSCRIPT}

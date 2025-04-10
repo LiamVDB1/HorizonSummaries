@@ -48,6 +48,10 @@ The LFG Launchpad empowers the community to decide which new projects within the
 
 With this comprehensive framework, Jupiter has become a central hub of decentralized finance, fostering community participation while advancing DeFi on Solana"
 
+{JUPITER_CONTEXT}
+
+{TOPICS}
+
 **Transcript:**
 {TRANSCRIPT}
 """,

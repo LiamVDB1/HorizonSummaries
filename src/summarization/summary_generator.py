@@ -6,6 +6,7 @@ import logging
 from typing import List, Dict, Any, Optional, Union
 
 from src.config import Config
+from src.preprocessing.reference_data import load_term_context, load_people_context
 from src.utils.logger import setup_logger
 from src.llm.vertex_ai import VertexAIGenerator
 
@@ -53,34 +54,46 @@ def format_topics(topics: Optional[Union[List[str], List[Dict[str, Any]]]]) -> s
     # Fallback for unexpected input
     return str(topics)
 
+
 def prepare_summary_prompt(
-    template: str,
-    transcript: str,
-    topics: Optional[Union[List[str], List[Dict[str, Any]]]] = None
+        template: str,
+        transcript: str,
+        topics: Optional[Union[List[str], List[Dict[str, Any]]]] = None,
+        term_data: Optional[Dict[str, Any]] = None,
+        people_data: Optional[Dict[str, Any]] = None
 ) -> str:
-    """
-    Prepares a summary prompt by filling in a template with transcript and topics.
-
-    Args:
-        template: The prompt template string
-        transcript: The transcript text to summarize
-        topics: Optional list of topics extracted from the transcript
-
-    Returns:
-        Complete prompt ready for the AI model
-    """
+    """Prepares a summary prompt with transcript, topics, and reference data."""
     topics_formatted = format_topics(topics)
 
-    # Support both uppercase and lowercase template variables
+    # Add reference data formatting
+    terms_context = ""
+    people_context = ""
+
+    if term_data and "terms" in term_data:
+        terms_list = [t if isinstance(t, str) else t.get("term") for t in term_data["terms"] if t]
+        important_terms = [t for t in terms_list if t][:35]  # Limit to most important
+        if important_terms:
+            terms_context = f"\n\n**Important Jupiter Terms:** {', '.join(important_terms)}"
+
+    if people_data and "people" in people_data:
+        people_list = [p if isinstance(p, str) else p.get("name") for p in people_data["people"] if p]
+        people_context = f"\n\n**Important Jupiter People:** {', '.join(people_list)}" # No Limit for people, everyone is important.
+
+    # Add to prompt
+    context = f"{terms_context}{people_context}"
+
+    # Format prompt with all components
     if "{TRANSCRIPT}" in template:
         # Support original uppercase format
         prompt = template.replace("{TRANSCRIPT}", transcript)
         prompt = prompt.replace("{TOPICS}", topics_formatted)
+        prompt = prompt.replace("{JUPITER_CONTEXT}", context)  # Add placeholder in templates
     else:
         # Support newer lowercase format
         prompt = template.format(
             transcript=transcript,
-            topics=topics_formatted
+            topics=topics_formatted,
+            jupiter_context=context
         )
 
     return prompt
@@ -113,14 +126,20 @@ async def generate_summary(
     """
     logger.info(f"Generating summary with model {model_name}")
 
+    # Load Reference Data
+    term_data = load_term_context()
+    people_data = load_people_context()
+
     # Prepare the complete prompt
-    prompt = prepare_summary_prompt(prompt_template, transcript, topics)
+    prompt = prepare_summary_prompt(prompt_template, transcript, topics, term_data, people_data)
 
     # Initialize the generator
     generator = VertexAIGenerator()
 
     # Define a system instruction specific to summarization
-    system_instruction = """You are an expert summarizer specializing in blockchain and crypto project communications, particularly for the Jupiter ecosystem on Solana. Your goal is to create clear, concise, and engaging summaries from transcripts. Focus on key decisions, announcements, technical details, community sentiment, and action items. Use Markdown formatting for readability."""
+    system_instruction = """You are an expert summarizer specializing in blockchain and crypto project communications, particularly for the Jupiter ecosystem on Solana. Your goal is to create clear, concise, and engaging summaries from transcripts.
+    IMPORTANT: Be extremely precise with Jupiter-specific terminology and people names. If a name or term appears in the provided context lists, always use that exact spelling and capitalization.
+    Focus on key decisions, announcements, technical details, community sentiment, and action items. Use Markdown formatting for readability."""
 
     logger.info("Sending summarization request to VertexAI")
     response = await generator.generate_response_with_retry(

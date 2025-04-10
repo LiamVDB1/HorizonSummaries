@@ -22,8 +22,8 @@ class Config:
     RESOURCES_DIR = DATA_DIR / "resources"
     DATABASE_DIR = DATA_DIR / "database" # New directory for the database
 
-    HIGH_CONFIDENCE_THRESHOLD = 0.75  # Apply before LLM analysis
-    MEDIUM_CONFIDENCE_THRESHOLD = 0.6  # Apply after LLM analysis if not conflicting
+    HIGH_CONFIDENCE_THRESHOLD = 0.85  # Apply before LLM analysis
+    MEDIUM_CONFIDENCE_THRESHOLD = 0.7  # Apply after LLM analysis if not conflicting
 
     # --- Files ---
     JUPITER_TERMS_FILE = RESOURCES_DIR / "jupiter_terms.json" # Path to known terms
