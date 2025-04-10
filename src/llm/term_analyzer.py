@@ -7,20 +7,18 @@ import logging
 from typing import List, Dict, Optional, Any
 
 from src.config import Config
-from src.llm.vertex_ai import generate_text, parse_json_from_llm, initialize_vertex_ai
+from src.llm.vertex_ai import VertexAIGenerator
 from src.preprocessing.reference_data import format_terms_for_prompt, format_people_for_prompt, extract_terms_list, \
     extract_people_list
 from src.utils.logger import setup_logger
+from src.utils.json_parser import parse_json_from_llm
 
 logger = setup_logger(__name__)
 
-# Initialize Vertex AI if it hasn't been already
-initialize_vertex_ai()
-
 async def analyze_transcript_for_term_errors(
     transcript: str,
-    term_data: Optional[List[str]] = None,
-    people_data: Optional[List[str]] = None,
+    term_data: Dict[str, Any],
+    people_data: Dict[str, Any],
     model_name: str = Config.TERM_ANALYSIS_MODEL
 ) -> Optional[Dict[str, Dict[str, Any]]]:
     """
@@ -30,7 +28,7 @@ async def analyze_transcript_for_term_errors(
     Args:
         transcript (str): The transcript text to analyze.
         term_data (Dict[str, Any]): Rich term context data.
-        name_data (Dict[str, Any]): Rich name context data.
+        people_data (Dict[str, Any]): Rich name context data.
         model_name (str): The Vertex AI model to use for analysis.
 
     Returns:
@@ -138,14 +136,17 @@ Analyze the following transcript for potential misspellings, mishearings, or inc
     system_instruction = """You are an AI assistant specialized in analyzing text transcripts from the Solana and Jupiter ecosystem. Your task is to identify and correct misspellings or variations of specific known terms and names based on the comprehensive reference data provided. You must output your findings strictly as a JSON object mapping incorrect terms to detailed correction information including confidence scores and reasoning."""
 
     try:
+        generator = VertexAIGenerator()
         # Generate the analysis using the core vertex_ai function
-        raw_llm_output = await generate_text(
+        llm_output = await generator.generate_response_with_retry(
             prompt=prompt,
-            model_name=model_name,
+            model=model_name,
             temperature=0.2,  # Lower temperature for more deterministic analysis
             max_output_tokens=4096,  # Increased for detailed responses with rich context
             system_instruction=system_instruction
         )
+
+        raw_llm_output = llm_output.get("content", "")
 
         if not raw_llm_output:
             logger.warning("Term analysis LLM returned an empty response.")

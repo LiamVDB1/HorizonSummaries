@@ -1,6 +1,12 @@
 # src/config.py
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables at module import time, BEFORE class definition
+project_root = Path(__file__).parent.parent
+dotenv_path = project_root / '.env'
+load_dotenv(dotenv_path=dotenv_path)
 
 class Config:
     """Stores configuration settings for the application."""
@@ -33,11 +39,13 @@ class Config:
     # --- AI Model Settings ---
     # Default model for summarization, term analysis, topic extraction
     # Ensure this model supports function calling or structured JSON output if needed
-    DEFAULT_MODEL = "gemini-1.5-flash-001"
+    DEFAULT_MODEL = "gemini-2.5-pro-exp-03-25"
+    LESSER_MODEL = "gemini-2.0-flash-001"
+
     # You might want separate models or configurations for different tasks
-    TERM_ANALYSIS_MODEL = os.getenv("TERM_ANALYSIS_MODEL", DEFAULT_MODEL)
-    TOPIC_EXTRACTION_MODEL = os.getenv("TOPIC_EXTRACTION_MODEL", DEFAULT_MODEL)
-    SUMMARIZATION_MODEL = os.getenv("SUMMARIZATION_MODEL", DEFAULT_MODEL)
+    TERM_ANALYSIS_MODEL = LESSER_MODEL
+    TOPIC_EXTRACTION_MODEL = LESSER_MODEL
+    SUMMARIZATION_MODEL = DEFAULT_MODEL
 
     # --- Transcription Settings ---
     FALAI_WHISPER_MODEL = "wizper"

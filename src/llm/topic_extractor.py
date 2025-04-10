@@ -8,14 +8,11 @@ import json
 from typing import List, Dict, Optional, Any, Union
 
 from src.config import Config
-from src.llm.vertex_ai import generate_text, parse_json_from_llm, initialize_vertex_ai
+from src.llm.vertex_ai import VertexAIGenerator
 from src.utils.logger import setup_logger
+from src.utils.json_parser import parse_json_from_llm
 
 logger = setup_logger(__name__)
-
-# Initialize Vertex AI
-initialize_vertex_ai()
-
 
 async def extract_topics_llm(
         transcript: str,
@@ -138,13 +135,17 @@ For Jup & Juice podcasts, emphasize:
     system_instruction = """You are an AI assistant skilled at identifying key topics within lengthy text documents, specifically transcripts related to Jupiter DAO communications. Your goal is to extract a structured list of the most relevant subjects discussed with supporting information. Output must be a valid JSON array of topic objects."""
 
     try:
-        raw_llm_output = await generate_text(
+        generator = VertexAIGenerator()
+
+        llm_output = await generator.generate_response_with_retry(
             prompt=prompt,
-            model_name=model_name,
+            model=model_name,
             temperature=0.3,  # Moderate temperature for topic identification
             max_output_tokens=2048,  # Increased for more detailed responses
             system_instruction=system_instruction
         )
+
+        raw_llm_output = llm_output.get("content", "")
 
         if not raw_llm_output:
             logger.warning("Topic extraction LLM returned an empty response.")

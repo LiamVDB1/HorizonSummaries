@@ -15,6 +15,18 @@ from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 
+from src.config import Config
+from src.utils.logger import setup_logger
+from src.utils.file_handling import save_to_file, ensure_directory, sanitize_filename
+from src.database.term_db import initialize_database as init_term_db
+from src.downloaders.common import download_audio
+from src.transcription.fal_whisper import transcribe_audio
+from src.preprocessing.transcript_cleaner import clean_transcript
+from src.preprocessing.term_correction import correct_jupiter_terms
+from src.preprocessing.topic_extraction import extract_topics
+from src.summarization.templates import get_prompt_template # We still need this
+from src.summarization.summary_generator import generate_summary
+
 # --- Load .env file ---
 project_root = os.path.dirname(os.path.abspath(__file__))
 dotenv_path = os.path.join(project_root, '.env')
@@ -30,29 +42,6 @@ if src_path not in sys.path:
     sys.path.insert(0, src_path)
     print(f"Added '{src_path}' to sys.path")
 
-# --- Imports ---
-try:
-    from src.config import Config
-    from src.utils.logger import setup_logger
-    from src.utils.file_handling import save_to_file, ensure_directory, sanitize_filename
-    from src.database.term_db import initialize_database as init_term_db
-    from src.llm.vertex_ai import initialize_vertex_ai as init_vertex
-    from src.downloaders.common import download_audio
-    from src.transcription.fal_whisper import transcribe_audio
-    from src.preprocessing.transcript_cleaner import clean_transcript
-    from src.preprocessing.term_correction import correct_jupiter_terms
-    from src.preprocessing.topic_extraction import extract_topics
-    from src.summarization.templates import get_prompt_template # We still need this
-    from src.llm.vertex_ai import generate_summary
-except ImportError as e:
-     print(f"Error importing project modules: {e}")
-     print("Ensure you are running this script from the project root directory where main.py is located,")
-     print("and that the 'src' directory is present and contains the necessary modules.")
-     print(f"Current sys.path: {sys.path}")
-     sys.exit(1)
-except Exception as e:
-    print(f"An unexpected error occurred during initial imports: {e}")
-    sys.exit(1)
 
 # --- Logging ---
 logging.basicConfig(level=Config.LOG_LEVEL, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -137,7 +126,6 @@ async def process_video(video_url: str, prompt_type: str, model_name: str = None
         logger.info("Generating summary...")
         prompt_template = get_prompt_template(prompt_type) # Fetch template using the string name
         if not prompt_template:
-             # Even without argparse, we should check if the template exists
              logger.error(f"Prompt template '{prompt_type}' could not be loaded. Check data/prompts folder.")
              raise ValueError(f"Prompt template '{prompt_type}' not found.")
 

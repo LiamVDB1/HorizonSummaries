@@ -3,10 +3,7 @@ Transcript preprocessing and enhancement utilities.
 """
 
 # Import the main cleaning functions
-from src.preprocessing.transcript_cleaner import (
-    clean_transcript,
-    split_into_paragraphs,
-)
+from src.preprocessing.transcript_cleaner import clean_transcript
 
 # Import topic extraction
 from src.preprocessing.topic_extraction import extract_topics
@@ -18,7 +15,6 @@ from src.preprocessing.term_correction import correct_jupiter_terms
 __all__ = [
     # Transcript cleaning
     "clean_transcript",
-    "split_into_paragraphs",
 
     # Topic extraction
     "extract_topics",

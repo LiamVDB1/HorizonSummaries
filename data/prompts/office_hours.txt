@@ -1,0 +1,91 @@
+Summarize the latest Office Hours transcript in a fun, energetic, and engaging way.
+Focus on key topics discussed, decisions made, and any exciting announcements or updates, while capturing the casual, humorous tone of the conversation. Be sure to use **emojis** to make the summary lively and interactive!
+Keep it concise but **comprehensive**, ensuring that **ALL relevant elements and moments** from the conversation are included.
+
+**Working Group Updates**: Make sure to provide updates from each working group, capturing their key announcements, decisions, and upcoming plans. Format the output as bullet points under each working group name, like this:
+"
+Working Group Updates
+
+	•	Uplink Working Group
+		•	[Key update or decision made]
+		•	[Next steps or upcoming plans]
+	•	DAO Working Group
+		•	[Key update or decision made]
+		•	[Next steps or upcoming plans]
+"
+
+Write the thread as an external person (no “We did this”)
+Highlight any funny moments, inside jokes, and interesting ideas discussed, especially those that reflect the community spirit.
+Ensure the summary feels accessible to both newcomers and long-term community members. Use Jupiter-specific lingo and community phrases where applicable!
+
+Office Hours Context:
+"Jupiter’s Office Hours are weekly sessions hosted by the Core Working Group (CWG) and various other working groups. These meetings provide an open platform for community members to discuss topics related to the DAO, governance, ongoing working group projects, and broader Web3 initiatives. It’s an excellent opportunity for members to ask questions, provide feedback, and gain insights into the latest developments in the Jupiter ecosystem. Additionally, specific sessions are often allocated for catdets and other contributors to present their own initiatives and engage with the community on a more personal level"
+
+Jupiter Context:
+"Jupiter is a decentralized finance (DeFi) platform built on Solana, initially known as the top aggregator for token swaps. Beyond its roots in trading, Jupiter has grown into a dynamic ecosystem that offers perpetual trading, liquidity provision, and governance mechanisms. At its heart is the Jupiverse, which integrates all aspects of the platform into a cohesive community-driven environment.
+
+The Jupiverse refers to the collective of users, working groups, contributors, and developers working together to shape Jupiter’s future. DAO governance is a crucial element, where $JUP holders vote on decisions ranging from project launches to strategic changes. The working groups, such as the Core and Uplink groups, handle vital aspects like community management, ecosystem token lists, and the LFG launchpad process ￼ ￼. These groups are the engines that power Jupiter’s growth, facilitating everything from grant programs to token curations.
+
+The LFG Launchpad empowers the community to decide which new projects within the Solana ecosystem receive support, creating a continuous cycle of innovation ￼. Through these initiatives, the Jupiverse embodies a thriving DeFi ecosystem built on collaboration, transparency, and decentralized governance.
+
+With this comprehensive framework, Jupiter has become a central hub of decentralized finance, fostering community participation while advancing DeFi on Solana"
+
+I will first give you an example. The structure of your Recap should follow the structure of this example.
+Example:
+"🎉 Jupiter Office Hours Recap: JUPITER'S HOME! 🚀
+*[Powered by Jupiter Horizon AI 🤖 - https://juphorizon.com]*
+
+Another electrifying Jupiter Office Hours has wrapped, packed with community vibes, exciting updates, and a game-changing idea that'll have the whole Jupiverse buzzing! ⚡️
+
+**🏆 Working Group Updates**
+
+- **Catdet Working Group (CAWG)**
+    - Laser-focused on boosting their Twitter presence! Follow @JUPCatdets on X (formerly Twitter) to join the 3K to 5K follower push before next month's vote to become a full-fledged working group.  📈
+    -  Tightening their proposal scope in collaboration with the Core Working Group (CWG). 🤝
+    -  Planning exciting events. Stay tuned! 👀
+
+- **Jup & Juice Working Group**
+    - The logo contest was a SMASH!  Hundreds of entries poured in, and the community voted for their favorites. Axel's juice box design emerged victorious! 🧃  They will refine the design and unveil the official logo soon.
+    - Stream setup revamp in progress for a more cohesive visual experience across platforms. 🎬
+    - New trial working group member joining to help with "lo-fi" content for TikTok and YouTube! 🤫
+    - Focus on cohesive branding and streamlined workflow. ⚙️
+
+- **Uplink Working Group**
+    - No Planetary Call this week due to the JUP Rally.
+    - The Twitter Growth Workshop with Cloudz and OG was a HUGE success! 🐦
+    - Working on DAO Grant votes for several projects, including Jesse, GC, Fabiano, and Dr. Preballing.
+    - The "5 Sol Challenge" is still ON! Trade 5 SOL on JUP Mobile for a chance to win from a 5,000 JUP prize pool! 💰
+    - Uplink Twitter briefly faced a restriction, but it's back in action. 💪
+    - Pumping out APE and ASR content! 🦍
+    - Exploring Meta collaboration to potentially revive the Instagram account.🤞
+
+- **Core Working Group (CWG)**
+    - A vote is coming soon to decide whether to raise the voting quorum from 60 million.  🗳️
+    - A new bounty is on the horizon, challenging the community to create the best image representing "Jupiter's Home." 🏡
+    - Actively mentoring 16 groups through the grant system, offering guidance and support. 👨‍🏫
+    - First grant recipient announcement expected THIS WEEK!
+    - Revamped jup.eco website launched with four main sections: JUP Nexus (aggregating essays, research, and tweets), Media Kit (with a new Midjourney guide!), Opportunities (for both paid and unpaid contributions), and Links.  🤯
+    -  Backend migration for the site is almost complete. 🚧
+    -  Streamlined resources, searchable repositories, and easy access to brand assets, making it easier than ever to contribute and get involved. 💖
+
+
+🎤 **The Big Idea**: A community-driven "Jupiter's Home" video campaign!  No bounties, just pure Jupiverse passion!  Everyone is encouraged to create a short video saying "Jupiter's Home" and share it on social media. The working groups will compile these into one epic video showcasing the global reach and spirit of the Jupiter community. 🌎
+
+💡 **Other Cool Ideas**:
+-  A Jupiverse "end-of-year" documentary-style video, capturing the journey, challenges, and triumphs of the DAO and its working groups. 🎥
+-   A retrospective look at the impact of Jupiter and its airdrop on community members' lives. 💖
+
+**❓ Questions Asked:**
+
+- **Q:**  Is there a difference between being rewarded and taking a salary with DAO grants?
+- **A:** Grants are meant to reward contributions, not replace salaries.  Ask for enough to prove your value and justify future funding.  Multiple grants for the same project are possible. Uplink grants and other proof of work also count towards demonstrating value.
+
+**🔥 Takeaway:**
+
+This Office Hours ignited a spark of collaborative energy. The "Jupiter's Home" campaign is just the beginning! Get involved, share your voice, and help shape the future of Jupiter! LFG! ✨"
+
+Key topics from the transcript: {TOPICS}
+
+**Base the entire recap post ONLY on the following transcript.**
+**Transcript:**
+{TRANSCRIPT}s
