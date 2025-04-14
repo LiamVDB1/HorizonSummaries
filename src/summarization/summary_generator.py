@@ -6,7 +6,7 @@ import logging
 from typing import List, Dict, Any, Optional, Union
 
 from src.config import Config
-from src.preprocessing.reference_data import load_term_context, load_people_context
+from src.preprocessing.reference_data import load_term_context, load_people_context, format_terms_for_prompt, format_people_for_prompt
 from src.utils.logger import setup_logger
 from src.llm.vertex_ai import VertexAIGenerator
 
@@ -70,14 +70,11 @@ def prepare_summary_prompt(
     people_context = ""
 
     if term_data and "terms" in term_data:
-        terms_list = [t if isinstance(t, str) else t.get("term") for t in term_data["terms"] if t]
-        important_terms = [t for t in terms_list if t][:35]  # Limit to most important
-        if important_terms:
-            terms_context = f"\n\n**Important Jupiter Terms:** {', '.join(important_terms)}"
+        term_data["terms"]  = term_data["terms"][:35]  # Limit to most important
+        terms_context = format_terms_for_prompt(term_data)
 
     if people_data and "people" in people_data:
-        people_list = [p if isinstance(p, str) else p.get("name") for p in people_data["people"] if p]
-        people_context = f"\n\n**Important Jupiter People:** {', '.join(people_list)}" # No Limit for people, everyone is important.
+        people_context = format_people_for_prompt(people_data) # Every person is important
 
     # Add to prompt
     context = f"{terms_context}{people_context}"

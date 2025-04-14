@@ -18,7 +18,6 @@ async def extract_topics_llm(
         transcript: str,
         content_type: Optional[str] = None,
         model_name: str = Config.TOPIC_EXTRACTION_MODEL,
-        max_topics: int = 10  # Limit the number of topics
 ) -> Optional[List[Dict[str, Any]]]:
     """
     Extracts key topics and related information from a transcript using an LLM.
@@ -28,7 +27,6 @@ async def extract_topics_llm(
         content_type (str, optional): Type of content ("office_hours", "planetary_call", "jup_and_juice").
                                      Helps tailor the extraction to specific content formats.
         model_name (str): The Vertex AI model to use.
-        max_topics (int): Approximate maximum number of topics to return.
 
     Returns:
         Optional[List[Dict[str, Any]]]: A list of topic objects with metadata,
@@ -59,7 +57,7 @@ Analyze the following transcript from a Jupiter DAO communication and identify t
    - Suggest an appropriate category for the topic (e.g., "Governance", "Development", "Community", "Tokenomics", etc.)
    - Include a confidence score (0.0-1.0) indicating your certainty about this topic's presence
 4. Return ONLY a valid JSON array of objects in the format shown in the example below.
-5. Aim for approximately {max_topics} topics, but adjust based on the content's density.
+5. Find all high-confidence topics in the transcript. Do not limit the number - extract all meaningful topics that are clearly discussed.
 6. Focus on extracting specific, actionable information rather than general themes.
 7. If the transcript is too short or lacks clear topics, return an empty JSON array.
 

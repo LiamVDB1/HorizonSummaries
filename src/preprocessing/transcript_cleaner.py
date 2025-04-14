@@ -10,10 +10,10 @@ logger = logging.getLogger("horizon_summaries")
 
 # Common filler words and phrases to clean up
 FILLER_WORDS = [
-    r'\bum\b', r'\buh\b', r'\ber\b', r'\blike\b(?!\s+to|\s+I|\s+we|\s+they|\s+you)',
+    r'\bum\b', r'\buh\b', r'\ber\b',
     r'\byou know\b', r'\bkind of\b', r'\bsort of\b', r'\bi mean\b',
     r'\bbasically\b', r'\bliterally\b', r'\bactually\b', r'\breally\b',
-    r'\bjust\b', r'\bso\b(?!\s+that|\s+I|\s+we|\s+they|\s+you)'
+    r'\bjust\b'
 ]
 
 # Speaking disfluencies patterns

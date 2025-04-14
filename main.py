@@ -198,7 +198,7 @@ def main(video_url: str, prompt_type: str, model_name: str = None):
 
 if __name__ == "__main__":
     # --- !!! EDIT THESE VARIABLES BEFORE RUNNING !!! ---
-    video_url_to_process = "https://x.com/i/broadcasts/1OyKALnErRaxb"
+    video_url_to_process = "https://x.com/i/broadcasts/1mnxegkLOBbGX"
 
     # Specify the prompt type (must match a filename in data/prompts without .txt)
     prompt_type_to_use = "office_hours"
